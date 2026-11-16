@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Infos · SGC-NUM</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <script>try{var t=JSON.parse(localStorage.getItem('veille.settings')||'{}').theme;document.documentElement.dataset.theme=t==='light'?'light':'dark';}catch(e){document.documentElement.dataset.theme='dark';}</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="infos">
+  <header class="top">
+    <div class="brand" id="brand">Tableau de bord · Veille</div>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="veille.html">Veille</a>
+      <a href="infos.html" class="active">Infos</a>
+      <a href="reglages.html">Réglages</a>
+    </nav>
+    <div class="stale" id="stale" hidden></div>
+  </header>
+
+  <main class="infos">
+    <section class="panel full" id="wx-full"></section>
+    <section class="panel">
+      <h2>Calendrier</h2>
+      <ul id="deadlines" class="plain"></ul>
+    </section>
+    <section class="panel">
+      <h2>État des services</h2>
+      <ul id="services" class="plain"></ul>
+    </section>
+    <section class="panel full">
+      <h2>Actualités</h2>
+      <ul id="news" class="list big"></ul>
+    </section>
+  </main>
+
+  <footer id="foot"></footer>
+
+  <div id="modal" class="modal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <button class="close" id="close" aria-label="Fermer">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

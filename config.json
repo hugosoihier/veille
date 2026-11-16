@@ -1,0 +1,93 @@
+{
+  "retention_days": 60,
+  "news_retention_days": 3,
+  "max_items": 400,
+  "feeds": [
+    {
+      "name": "CERT-FR · Toutes publications",
+      "url": "https://www.cert.ssi.gouv.fr/feed/",
+      "type": "auto",
+      "max": 150,
+      "enabled": true
+    },
+    {
+      "name": "CERT-FR · Alertes",
+      "url": "https://www.cert.ssi.gouv.fr/alerte/feed/",
+      "type": "alerte",
+      "enabled": true
+    },
+    {
+      "name": "CERT-FR · Avis",
+      "url": "https://www.cert.ssi.gouv.fr/avis/feed/",
+      "type": "avis",
+      "enabled": true
+    },
+    {
+      "name": "CERT-FR · Menaces et incidents",
+      "url": "https://www.cert.ssi.gouv.fr/cti/feed/",
+      "type": "cti",
+      "enabled": true
+    },
+    {
+      "name": "CERT Santé · Alertes et vulnérabilités",
+      "url": "https://cyberveille.esante.gouv.fr/alertes-et-vulnerabilites/rss.xml",
+      "type": "vuln",
+      "enabled": true
+    },
+    {
+      "name": "Cisco · Avis de sécurité",
+      "url": "https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml",
+      "type": "vuln",
+      "max": 30,
+      "enabled": true
+    },
+    {
+      "name": "Fortinet · PSIRT",
+      "url": "https://filestore.fortinet.com/fortiguard/rss/ir.xml",
+      "type": "vuln",
+      "max": 30,
+      "enabled": true
+    },
+    {
+      "name": "BleepingComputer",
+      "url": "https://www.bleepingcomputer.com/feed/",
+      "type": "actualite",
+      "max": 15,
+      "enabled": true
+    },
+    {
+      "name": "franceinfo",
+      "url": "https://www.francetvinfo.fr/titres.rss",
+      "type": "news",
+      "max": 12,
+      "enabled": true
+    },
+    {
+      "name": "Le Monde",
+      "url": "https://www.lemonde.fr/rss/une.xml",
+      "type": "news",
+      "max": 12,
+      "enabled": true
+    }
+  ],
+  "kev": {
+    "enabled": true,
+    "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+    "days": 90,
+    "max": 80
+  },
+  "services": [
+    {
+      "name": "GitHub",
+      "url": "https://www.githubstatus.com/api/v2/status.json"
+    },
+    {
+      "name": "Cloudflare",
+      "url": "https://www.cloudflarestatus.com/api/v2/status.json"
+    },
+    {
+      "name": "Zoom",
+      "url": "https://status.zoom.us/api/v2/status.json"
+    }
+  ]
+}

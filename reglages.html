@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Réglages · SGC-NUM</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <script>try{var t=JSON.parse(localStorage.getItem('veille.settings')||'{}').theme;document.documentElement.dataset.theme=t==='light'?'light':'dark';}catch(e){document.documentElement.dataset.theme='dark';}</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="reglages">
+  <header class="top">
+    <div class="brand" id="brand">Tableau de bord · Veille</div>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="veille.html">Veille</a>
+      <a href="infos.html">Infos</a>
+      <a href="reglages.html" class="active">Réglages</a>
+    </nav>
+    <div class="stale" id="stale" hidden></div>
+  </header>
+
+  <main class="settings">
+    <section class="panel">
+      <h2>Affichage</h2>
+      <label class="hint" for="set-title">Titre affiché en haut</label>
+      <input id="set-title" type="text" maxlength="60" autocomplete="off">
+      <p class="hint spaced">Thème</p>
+      <div class="chips" id="set-theme"></div>
+      <p class="hint spaced">Nuit : fond sombre, idéal pour un écran mural. Jour : fond clair, plus lisible en pleine lumière.</p>
+    </section>
+    <section class="panel">
+      <h2>Logiciels suivis</h2>
+      <p class="hint">Un groupe par ligne : <code>Nom du groupe: logiciel 1, logiciel 2, …</code><br>
+      Une publication qui cite un de ces mots est marquée « Périmètre » et remonte sur l'accueil.
+      Cette liste reste sur la tablette : elle n'est jamais envoyée ni publiée.</p>
+      <textarea id="set-watch" rows="12" spellcheck="false"></textarea>
+      <div class="actions">
+        <button class="btn primary" id="save" type="button">Enregistrer</button>
+        <button class="btn" id="reset" type="button">Valeurs par défaut</button>
+        <span id="saved" class="hint"></span>
+      </div>
+    </section>
+    <section class="panel full">
+      <h2>Données et application</h2>
+      <ul id="sources" class="plain"></ul>
+      <div class="actions">
+        <button class="btn" id="refresh" type="button">Actualiser maintenant</button>
+        <span class="hint" id="version"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer id="foot"></footer>
+
+  <div id="modal" class="modal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <button class="close" id="close" aria-label="Fermer">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
