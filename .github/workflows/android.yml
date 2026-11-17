@@ -41,7 +41,7 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
           if [ -z "$KS_B64" ]; then echo "::error::Secret ANDROID_KEYSTORE_B64 manquant"; exit 1; fi
-          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/veille.keystore"
+          printf '%s' "$KS_B64" | tr -d '\r\n ' | base64 -d > "$RUNNER_TEMP/veille.keystore"
 
       - name: Compilation
         env:
