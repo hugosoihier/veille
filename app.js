@@ -10,7 +10,7 @@
   const SW_CHECK_MS = 30 * 60 * 1000; // cherche une nouvelle version de l'appli
   const PAGES = { 'index.html': 'home', 'veille.html': 'veille', 'infos.html': 'infos', 'reglages.html': 'reglages' };
   const STALE_HOURS = 3;
-  const APP_VERSION = '2.4';
+  const APP_VERSION = '2.4.1';
   const ROTATION = ['index.html', 'veille.html', 'infos.html'];
   const ROTATE_CHOICES = [[0, 'Désactivé'], [30, '30 s'], [60, '1 min'], [120, '2 min']];
   const PULL_PX = 90;
@@ -1098,6 +1098,35 @@
       });
     });
     $('#notif-test').addEventListener('click', () => { try { APP.testNotification(); } catch (e) { /* ignoré */ } });
+
+    // Jeton GitHub : envoyé une seule fois à l'appli (qui le teste), jamais relu par la page.
+    const tokenState = () => {
+      const st = $('#gh-token-state');
+      $('#gh-token-del').hidden = !cfg.hasToken;
+      if (!cfg.hasToken) { st.textContent = 'Aucun jeton : la collecte dépend du planificateur de GitHub.'; return; }
+      const when = cfg.trigAt ? ago(new Date(cfg.trigAt)) : 'jamais';
+      st.textContent = cfg.trigStatus && cfg.trigStatus !== 'ok'
+        ? `Jeton enregistré · dernier essai ${when} : ${cfg.trigStatus}`
+        : `Jeton enregistré · dernière relance de la collecte : ${when}`;
+    };
+    const sendToken = (value) => {
+      const st = $('#gh-token-state');
+      st.textContent = 'Vérification auprès de GitHub…';
+      setTimeout(() => {
+        let res = '';
+        try { res = APP.setToken(value); } catch (e) { res = 'erreur'; }
+        $('#gh-token').value = '';
+        try { cfg = JSON.parse(APP.getConfig()); } catch (e) { /* ignoré */ }
+        if (res === 'ok' || res === 'removed') tokenState();
+        else st.textContent = 'Jeton non enregistré : ' + res;
+      }, 50);
+    };
+    $('#gh-token-save').addEventListener('click', () => {
+      const v = $('#gh-token').value.trim();
+      if (v) sendToken(v);
+    });
+    $('#gh-token-del').addEventListener('click', () => sendToken(''));
+    tokenState();
     $('#app-version').textContent = 'Appli Android ' + (cfg.version || '');
     draw();
   }

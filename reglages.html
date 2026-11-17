@@ -80,6 +80,19 @@
           <div class="chips" data-opt="weekend"></div>
         </div>
       </div>
+      <div class="opt opt-col">
+        <div class="opt-t"><b>Collecte déclenchée par la tablette</b><span class="hint">GitHub ne lance pas toujours la collecte programmée.
+          Avec un jeton, la tablette la relance elle-même quand les données ont plus de 20 min.
+          Jeton « fine-grained » limité au dépôt <code>veille</code>, permission <em>Actions : Read and write</em> uniquement.
+          Il reste dans la tablette et n'est jamais affiché.
+          <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Créer un jeton sur GitHub</a></span></div>
+        <div class="token-row">
+          <input id="gh-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+          <button class="btn primary" id="gh-token-save" type="button">Enregistrer</button>
+          <button class="btn" id="gh-token-del" type="button" hidden>Retirer</button>
+        </div>
+        <span class="hint" id="gh-token-state"></span>
+      </div>
       <p class="hint spaced" id="app-version"></p>
     </section>
     <section class="panel full">

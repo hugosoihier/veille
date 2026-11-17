@@ -4,3 +4,4 @@ android/*.apk
 *.keystore
 *.jks
 data.json.tmp
+android/*.idsig

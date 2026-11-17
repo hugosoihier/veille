@@ -27,6 +27,11 @@ final class Prefs {
     int nightEnd() { return sp.getInt("nightEnd", 7 * 60); }
     boolean weekendOff() { return sp.getBoolean("weekend", true); }
     String watchJson() { return sp.getString("watch", "{}"); }
+    String token() { return sp.getString("token", ""); }
+    long lastTrigger() { return sp.getLong("trigAt", 0); }
+    String triggerStatus() { return sp.getString("trigStatus", ""); }
+    void setToken(String t) { sp.edit().putString("token", t == null ? "" : t.trim()).putString("trigStatus", "").apply(); }
+    void setTrigger(long at, String status) { sp.edit().putLong("trigAt", at).putString("trigStatus", status).apply(); }
     String seenIds() { return sp.getString("seen", ""); }
     boolean primed() { return sp.getBoolean("primed", false); }
 
@@ -45,6 +50,9 @@ final class Prefs {
             o.put("nightEnd", hm(nightEnd()));
             o.put("weekend", weekendOff());
             o.put("version", version);
+            o.put("hasToken", !token().isEmpty());          // le jeton lui-même n'est jamais renvoyé à la page
+            o.put("trigAt", lastTrigger());
+            o.put("trigStatus", triggerStatus());
         } catch (JSONException ignored) { }
         return o;
     }

@@ -236,6 +236,24 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void checkNow() { Scheduler.runJobNow(MainActivity.this); }
+
+        /** Jeton GitHub (déclenchement de la collecte). Testé tout de suite ; renvoie « ok » ou l'erreur. */
+        @JavascriptInterface
+        public String setToken(String token) {
+            String t = token == null ? "" : token.trim();
+            if (t.isEmpty()) {
+                prefs.setToken("");
+                Scheduler.all(MainActivity.this);
+                return "removed";
+            }
+            String result = AlertJob.dispatch(t);   // appelé hors du fil principal par la WebView
+            if ("ok".equals(result)) {
+                prefs.setToken(t);
+                prefs.setTrigger(System.currentTimeMillis(), "ok");
+                Scheduler.all(MainActivity.this);
+            }
+            return result;
+        }
     }
 
     /* ---------- cycle de vie ---------- */

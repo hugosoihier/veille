@@ -462,4 +462,12 @@ footer .bad { color: var(--orange); font-weight: 600; }
   min-height: 44px; padding: .4rem .7rem; border-radius: 12px; font: inherit; font-weight: 700;
   background: var(--card-hi); color: var(--text); border: 1px solid var(--line);
 }
+.opt-col { flex-direction: column; align-items: stretch; gap: .6rem; }
+.opt-t a { color: var(--accent); font-weight: 650; }
+.token-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+.token-row input {
+  flex: 1 1 16rem; min-height: 48px; padding: .6rem .9rem; border-radius: 12px; user-select: text;
+  font: 1rem ui-monospace, Menlo, Consolas, monospace;
+  background: var(--card-hi); color: var(--text); border: 1px solid var(--line);
+}
 @media (max-width: 900px) { .fresh { display: none; } }

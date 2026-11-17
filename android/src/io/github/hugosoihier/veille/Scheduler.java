@@ -21,7 +21,8 @@ final class Scheduler {
 
     static void job(Context c) {
         JobScheduler js = (JobScheduler) c.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        if (!new Prefs(c).notifyOn()) { js.cancel(JOB_ID); return; }
+        Prefs p = new Prefs(c);
+        if (!p.notifyOn() && p.token().isEmpty()) { js.cancel(JOB_ID); return; }
         if (js.getPendingJob(JOB_ID) != null) return;
         js.schedule(new JobInfo.Builder(JOB_ID, new ComponentName(c, AlertJob.class))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)

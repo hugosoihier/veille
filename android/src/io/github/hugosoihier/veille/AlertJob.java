@@ -53,10 +53,13 @@ public class AlertJob extends JobService {
 
     static void check(Context c) throws Exception {
         Prefs p = new Prefs(c);
-        if (!p.notifyOn()) return;
+        if (!p.notifyOn() && p.token().isEmpty()) return;
         String raw;
         try { raw = get(Prefs.DATA_URL); } catch (Exception e) { raw = get(Prefs.DATA_FALLBACK); }
-        JSONArray items = new JSONObject(raw).getJSONArray("items");
+        JSONObject data = new JSONObject(raw);
+        maybeTriggerCollect(p, parseDate(data.optString("generated")));
+        if (!p.notifyOn()) return;
+        JSONArray items = data.getJSONArray("items");
         List<Pattern> watch = compileWatch(p.watchJson());
 
         Set<String> seen = new LinkedHashSet<>(Arrays.asList(p.seenIds().split(",")));
@@ -78,6 +81,48 @@ public class AlertJob extends JobService {
         keep.remove("");
         if (keep.size() > 400) keep = keep.subList(keep.size() - 400, keep.size());
         p.setSeen(join(keep));
+    }
+
+    /* ---------- déclenchement de la collecte GitHub ---------- */
+
+    private static final long STALE_MS = 20 * 60 * 1000L;       // données plus vieilles que 20 min
+    private static final long MIN_GAP_MS = 14 * 60 * 1000L;     // au plus un déclenchement par passage
+    static final String DISPATCH_URL =
+            "https://api.github.com/repos/hugosoihier/veille/actions/workflows/update.yml/dispatches";
+
+    /**
+     * GitHub ne garantit pas les tâches planifiées : si les données sont trop vieilles,
+     * la tablette lance elle-même le workflow de collecte (jeton limité à « Actions » sur ce dépôt).
+     */
+    static void maybeTriggerCollect(Prefs p, long generated) {
+        String token = p.token();
+        long now = System.currentTimeMillis();
+        if (token.isEmpty() || now - generated < STALE_MS || now - p.lastTrigger() < MIN_GAP_MS) return;
+        p.setTrigger(now, dispatch(token));
+    }
+
+    /** Lance le workflow ; renvoie « ok » ou un message d'erreur lisible. */
+    static String dispatch(String token) {
+        try {
+            HttpURLConnection h = (HttpURLConnection) new URL(DISPATCH_URL).openConnection();
+            h.setRequestMethod("POST");
+            h.setConnectTimeout(15000);
+            h.setReadTimeout(20000);
+            h.setDoOutput(true);
+            h.setRequestProperty("Authorization", "Bearer " + token);
+            h.setRequestProperty("Accept", "application/vnd.github+json");
+            h.setRequestProperty("X-GitHub-Api-Version", "2022-11-28");
+            h.setRequestProperty("Content-Type", "application/json");
+            h.getOutputStream().write("{\"ref\":\"main\"}".getBytes("UTF-8"));
+            int code = h.getResponseCode();
+            h.disconnect();
+            if (code == 204) return "ok";
+            if (code == 401) return "Jeton refusé ou expiré (401)";
+            if (code == 403 || code == 404) return "Droits insuffisants : Actions en lecture et écriture sur le dépôt veille (" + code + ")";
+            return "Réponse GitHub " + code;
+        } catch (Exception e) {
+            return "Pas de réponse de GitHub";
+        }
     }
 
     static void ensureChannel(Context c) {
