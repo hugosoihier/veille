@@ -463,6 +463,7 @@ footer .bad { color: var(--orange); font-weight: 600; }
   background: var(--card-hi); color: var(--text); border: 1px solid var(--line);
 }
 .opt-col { flex-direction: column; align-items: stretch; gap: .6rem; }
+.opt-col .opt-t { flex: none; }
 .opt-t a { color: var(--accent); font-weight: 650; }
 .token-row { display: flex; gap: .6rem; flex-wrap: wrap; }
 .token-row input {

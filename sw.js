@@ -1,5 +1,5 @@
-// Service worker : l'appli s'ouvre même sans connexion, avec les dernières données connues.
-const CACHE = 'veille-v2.4.1';
+﻿// Service worker : l'appli s'ouvre mÃªme sans connexion, avec les derniÃ¨res donnÃ©es connues.
+const CACHE = 'veille-v2.4.2';
 const SHELL = ['./', 'index.html', 'veille.html', 'infos.html', 'reglages.html', 'style.css', 'app.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
@@ -21,9 +21,9 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   const isData = url.pathname.endsWith('/data.json')
     && (url.origin === location.origin || url.hostname === 'raw.githubusercontent.com');
-  if (url.origin !== location.origin && !isData) return; // la météo est gérée par l'appli elle-même
+  if (url.origin !== location.origin && !isData) return; // la mÃ©tÃ©o est gÃ©rÃ©e par l'appli elle-mÃªme
 
-  // Données (site ou branche « data ») : réseau d'abord, dernière copie en secours.
+  // DonnÃ©es (site ou branche Â« data Â») : rÃ©seau d'abord, derniÃ¨re copie en secours.
   if (isData) {
     e.respondWith(
       fetch(req)
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Reste : copie locale tout de suite, mise à jour en arrière-plan.
+  // Reste : copie locale tout de suite, mise Ã  jour en arriÃ¨re-plan.
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then((hit) => {
       const net = fetch(req)
