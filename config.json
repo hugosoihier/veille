@@ -51,6 +51,29 @@
       "lang": "en"
     },
     {
+      "name": "Microsoft · Guide des mises à jour (MSRC)",
+      "url": "https://api.msrc.microsoft.com/update-guide/rss",
+      "type": "vuln",
+      "max": 30,
+      "enabled": true,
+      "lang": "en",
+      "exclude": "informational change only|Corrected the CVE"
+    },
+    {
+      "name": "Cybermalveillance · Alertes",
+      "url": "https://www.cybermalveillance.gouv.fr/feed/atom-flux-alertes",
+      "type": "cti",
+      "max": 15,
+      "enabled": true
+    },
+    {
+      "name": "Cybermalveillance · Actualités",
+      "url": "https://www.cybermalveillance.gouv.fr/feed/atom-flux-actualites",
+      "type": "actualite",
+      "max": 15,
+      "enabled": true
+    },
+    {
       "name": "BleepingComputer",
       "url": "https://www.bleepingcomputer.com/feed/",
       "type": "actualite",
@@ -78,6 +101,17 @@
     "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
     "days": 90,
     "max": 80
+  },
+  "nvd": {
+    "enabled": true,
+    "days": 7,
+    "min_score": 9.0,
+    "max": 40
+  },
+  "vigilance": {
+    "enabled": true,
+    "url": "https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-france",
+    "areas": ["Orne"]
   },
   "services": [
     {

@@ -91,6 +91,24 @@ Si une source est en échec, elle apparaît en orange en bas de page et dans Ré
 
 Le bouton « Plein écran » (en haut à droite) bascule le navigateur en plein écran. La navigation entre les pages se fait sans rechargement pour que le plein écran reste actif.
 
+## Nouveautés v2.4
+
+- **Appli Android** (dossier `android/`) : le tableau de bord en vraie application, avec démarrage automatique,
+  mode kiosque, mode nuit (écran éteint la nuit et le week-end, rallumé le matin) et **notifications** pour
+  les alertes CERT-FR et les failles exploitées qui touchent un logiciel suivi. Tout se règle dans
+  **Réglages → Appli Android** (visible uniquement dans l'appli).
+  L'APK est compilée par GitHub Actions et publiée dans la Release **apk** du dépôt. La clé de signature
+  n'est jamais dans le dépôt : secrets `ANDROID_KEYSTORE_B64` et `ANDROID_KEYSTORE_PASS`.
+- **Failles exploitées sur le périmètre** : mises en évidence en rouge et remontées en tête.
+- **Nouvelles sources** : Microsoft MSRC, Cybermalveillance.gouv.fr (alertes et actualités),
+  CVE critiques du NVD (CVSS ≥ 9, 7 derniers jours) et **vigilance météo** Météo-France pour l'Orne
+  (via Meteoalarm, sans clé). Département à changer dans `config.json` → `vigilance.areas`.
+- **Tendance sur 30 jours** (page Veille) : publications par jour et par type, détail au toucher.
+- **Tirer vers le bas pour actualiser**, et pastille « Mis à jour il y a X min » (verte, orange puis rouge).
+- **Défilement automatique** Accueil → Veille → Infos (Réglages → Affichage).
+- **Source en panne** : après 6 collectes en échec, une issue GitHub est ouverte automatiquement,
+  puis fermée quand la source répond de nouveau.
+
 ## Conseils de protection
 
 Chaque vulnérabilité affiche des conseils généraux (équipe informatique / utilisateurs) déduits par règles du type de faille et du produit. Ils ne remplacent pas l'avis officiel (bouton « Lien »).

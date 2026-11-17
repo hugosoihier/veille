@@ -33,6 +33,10 @@
       <p class="hint spaced">Thème</p>
       <div class="chips" id="set-theme"></div>
       <p class="hint spaced">Clair : fond clair et doux (par défaut). Soir : fond bleu nuit adouci, sans noir.</p>
+      <p class="hint spaced">Défilement automatique</p>
+      <div class="chips" id="set-rotate"></div>
+      <p class="hint spaced">Sans interaction, l'écran passe tout seul d'Accueil à Veille puis Infos, comme un affichage mural.
+      Il s'interrompt dès qu'on touche l'écran.</p>
     </section>
     <section class="panel">
       <h2>Logiciels suivis</h2>
@@ -45,6 +49,38 @@
         <button class="btn" id="reset" type="button">Valeurs par défaut</button>
         <span id="saved" class="hint"></span>
       </div>
+    </section>
+    <section class="panel full" id="app-panel" hidden>
+      <h2>Appli Android</h2>
+      <div class="opts">
+        <div class="opt">
+          <div class="opt-t"><b>Démarrage automatique</b><span class="hint">Ouvre le tableau de bord quand la tablette s'allume.</span></div>
+          <div class="chips" data-opt="autostart"></div>
+        </div>
+        <div class="opt">
+          <div class="opt-t"><b>Mode kiosque</b><span class="hint">Épingle l'appli à l'écran. Pour en sortir : maintenir les boutons Retour et Applications récentes.</span></div>
+          <div class="chips" data-opt="kiosk"></div>
+        </div>
+        <div class="opt">
+          <div class="opt-t"><b>Notifications d'alerte</b><span class="hint">Alerte CERT-FR, ou faille exploitée qui touche un logiciel suivi. Vérifié toutes les 15 min, même appli fermée.</span></div>
+          <div class="chips" data-opt="notify"></div>
+          <button class="btn" id="notif-test" type="button">Tester</button>
+        </div>
+        <div class="opt">
+          <div class="opt-t"><b>Mode nuit</b><span class="hint">Écran éteint la nuit, rallumé automatiquement le matin.</span></div>
+          <div class="chips" data-opt="night"></div>
+        </div>
+        <div class="opt" id="night-times">
+          <div class="opt-t"><b>Horaires</b><span class="hint">Extinction, puis réveil (jours ouvrés). Toucher l'écran la nuit le rallume 10 min.</span></div>
+          <label class="time-f">Extinction <input id="night-start" type="time"></label>
+          <label class="time-f">Réveil <input id="night-end" type="time"></label>
+        </div>
+        <div class="opt">
+          <div class="opt-t"><b>Éteint le week-end</b><span class="hint">Samedi et dimanche entiers, avec le mode nuit.</span></div>
+          <div class="chips" data-opt="weekend"></div>
+        </div>
+      </div>
+      <p class="hint spaced" id="app-version"></p>
     </section>
     <section class="panel full">
       <h2>Données et application</h2>

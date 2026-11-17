@@ -1,0 +1,6 @@
+# Appli Android : fichiers de compilation et clé de signature (jamais dans le dépôt)
+android/build/
+android/*.apk
+*.keystore
+*.jks
+data.json.tmp

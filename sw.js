@@ -1,5 +1,5 @@
 // Service worker : l'appli s'ouvre même sans connexion, avec les dernières données connues.
-const CACHE = 'veille-v2.3';
+const CACHE = 'veille-v2.4';
 const SHELL = ['./', 'index.html', 'veille.html', 'infos.html', 'reglages.html', 'style.css', 'app.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 

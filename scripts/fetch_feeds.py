@@ -112,6 +112,8 @@ def resolve_type(feed_type, link):
 def parse_feed(raw, feed):
     root = ET.fromstring(raw)
     out = []
+    # « exclude » (optionnel) : expression régulière des éléments à ignorer (ex. révisions sans contenu)
+    exclude = re.compile(feed["exclude"], re.I) if feed.get("exclude") else None
     for node in root.iter():
         if local(node.tag) not in ("item", "entry"):
             continue
@@ -120,6 +122,9 @@ def parse_feed(raw, feed):
             continue
         link = child_text(node, "link") if local(node.tag) == "item" else atom_link(node)
         link = safe_url(link or atom_link(node))
+        summary = clean(child_text(node, "description", "summary", "content", "encoded"))
+        if exclude and exclude.search(f"{title} {summary}"):
+            continue
         out.append({
             "source": feed["name"],
             "type": resolve_type(feed["type"], link),
@@ -127,7 +132,7 @@ def parse_feed(raw, feed):
             "title": title,
             "link": link,
             "date": parse_date(child_text(node, "pubDate", "published", "updated", "date")),
-            "summary": clean(child_text(node, "description", "summary", "content", "encoded")),
+            "summary": summary,
         })
     return out[: feed.get("max", 100)]
 
@@ -190,6 +195,110 @@ def collect_kev(cfg, status):
         return []
 
 
+def collect_nvd(cfg, status):
+    """CVE critiques récentes (NVD, score CVSS ≥ min_score). API publique sans clé."""
+    nvd = cfg.get("nvd", {})
+    if not nvd.get("enabled"):
+        return []
+    name = "NVD · CVE critiques"
+    try:
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=nvd.get("days", 7))
+        fmt = "%Y-%m-%dT%H:%M:%S.000"
+        url = ("https://services.nvd.nist.gov/rest/json/cves/2.0?cvssV3Severity=CRITICAL&resultsPerPage=500"
+               f"&pubStartDate={start.strftime(fmt)}&pubEndDate={end.strftime(fmt)}")
+        data = json.loads(fetch_bytes(url))
+        items = []
+        for v in data.get("vulnerabilities", []):
+            c = v.get("cve", {})
+            if c.get("vulnStatus") == "Rejected":
+                continue
+            metrics = c.get("metrics", {})
+            score = 0.0
+            for key in ("cvssMetricV40", "cvssMetricV31", "cvssMetricV30"):
+                for m in metrics.get(key, []):
+                    score = max(score, float(m.get("cvssData", {}).get("baseScore", 0)))
+            if score < nvd.get("min_score", 9.0):
+                continue
+            desc = next((d["value"] for d in c.get("descriptions", []) if d.get("lang") == "en"), "")
+            cve = c.get("id", "")
+            head = f"{cve} — CVSS {score:.1f} : "
+            tail = clean(desc.split(". ")[0], 160)
+            items.append({
+                "source": name,
+                "type": "cve",
+                "lang": "en",
+                "title": head + tail,
+                "title_head": head,
+                "title_tail": tail,
+                "link": f"https://nvd.nist.gov/vuln/detail/{cve}",
+                "date": parse_date(c.get("published", "")),
+                "summary": clean(desc),
+                "score": score,
+            })
+        items.sort(key=lambda i: (i["date"] or end), reverse=True)
+        items = items[: nvd.get("max", 40)]
+        status[name] = {"ok": True, "count": len(items)}
+        log(f"OK    {name}: {len(items)} éléments")
+        return items
+    except Exception as exc:
+        status[name] = {"ok": False, "count": 0, "error": str(exc)[:160]}
+        log(f"ECHEC {name}: {exc}")
+        return []
+
+
+# Vigilance météo (Meteoalarm : données officielles Météo-France, sans clé d'API)
+VIGI_LEVEL = {"Moderate": ("jaune", 1), "Severe": ("orange", 2), "Extreme": ("rouge", 3)}
+VIGI_EVENT = (
+    ("thunderstorm", "Orages"), ("wind", "Vent violent"), ("rain", "Pluie-inondation"),
+    ("flood", "Crues / inondation"), ("snow", "Neige-verglas"), ("ice", "Neige-verglas"),
+    ("high-temperature", "Canicule"), ("heat", "Canicule"), ("low-temperature", "Grand froid"),
+    ("cold", "Grand froid"), ("avalanche", "Avalanches"), ("coastal", "Vagues-submersion"),
+    ("fog", "Brouillard"), ("forest", "Feux de forêt"),
+)
+
+
+def collect_vigilance(cfg, status):
+    vg = cfg.get("vigilance", {})
+    if not vg.get("enabled"):
+        return []
+    name = "Météo-France · Vigilance"
+    areas = {a.lower() for a in vg.get("areas", [])}
+    try:
+        root = ET.fromstring(fetch_bytes(vg["url"]))
+        now = datetime.now(timezone.utc)
+        best = {}
+        for entry in root.iter():
+            if local(entry.tag) != "entry":
+                continue
+            area = child_text(entry, "areaDesc")
+            if areas and area.lower() not in areas:
+                continue
+            level = VIGI_LEVEL.get(child_text(entry, "severity"))
+            expires = parse_date(child_text(entry, "expires"))
+            if not level or (expires and expires < now):
+                continue
+            ev = child_text(entry, "event").lower()
+            label = next((fr for key, fr in VIGI_EVENT if key in ev), child_text(entry, "event"))
+            onset = parse_date(child_text(entry, "onset", "effective"))
+            key = (area, label)
+            cur = best.get(key)
+            if not cur or level[1] > cur["rank"]:
+                best[key] = {
+                    "area": area, "event": label, "level": level[0], "rank": level[1],
+                    "onset": onset.isoformat() if onset else None,
+                    "expires": expires.isoformat() if expires else None,
+                }
+        out = sorted(best.values(), key=lambda v: (-v["rank"], v["event"]))
+        status[name] = {"ok": True, "count": len(out)}
+        log(f"OK    {name}: {len(out)} vigilance(s)")
+        return out
+    except Exception as exc:
+        status[name] = {"ok": False, "count": 0, "error": str(exc)[:160]}
+        log(f"ECHEC {name}: {exc}")
+        return None   # None = garder la valeur précédente
+
+
 def collect_services(cfg, status, previous):
     """Pages d'état au format Statuspage (api/v2/status.json)."""
     out = []
@@ -235,7 +344,7 @@ def main():
     status = {}
     previous = load_previous()
 
-    fresh = collect_feeds(cfg, status) + collect_kev(cfg, status)
+    fresh = collect_feeds(cfg, status) + collect_kev(cfg, status) + collect_nvd(cfg, status)
     for it in fresh:
         it["date"] = (it["date"] or now).isoformat()
         it["cve"] = sorted({c.upper() for c in CVE_RE.findall(f'{it["title"]} {it["summary"]}')})
@@ -263,12 +372,27 @@ def main():
     items = items[: cfg.get("max_items", 400)]
 
     services = collect_services(cfg, status, previous)
+    vigilance = collect_vigilance(cfg, status)
+    if vigilance is None:
+        vigilance = previous.get("vigilance", [])
+
+    # Échecs consécutifs par source (utilisé pour ouvrir une issue GitHub si une source reste en panne).
+    old_status = previous.get("status", {})
+    for src, st in status.items():
+        prev = old_status.get(src, {})
+        if st["ok"]:
+            st["fails"] = 0
+        else:
+            st["fails"] = prev.get("fails", 0) + 1
+            st["since"] = prev.get("since") if not prev.get("ok", True) and prev.get("since") else now.isoformat()
+
     ok_count = sum(1 for s in status.values() if s["ok"])
     out = {
         "generated": now.isoformat(),
         "last_success": now.isoformat() if ok_count else previous.get("last_success"),
         "status": status,
         "services": services,
+        "vigilance": vigilance,
         "items": items,
     }
     tmp = OUTPUT + ".tmp"

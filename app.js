@@ -10,18 +10,24 @@
   const SW_CHECK_MS = 30 * 60 * 1000; // cherche une nouvelle version de l'appli
   const PAGES = { 'index.html': 'home', 'veille.html': 'veille', 'infos.html': 'infos', 'reglages.html': 'reglages' };
   const STALE_HOURS = 3;
-  const APP_VERSION = '2.3';
+  const APP_VERSION = '2.4';
+  const ROTATION = ['index.html', 'veille.html', 'infos.html'];
+  const ROTATE_CHOICES = [[0, 'Désactivé'], [30, '30 s'], [60, '1 min'], [120, '2 min']];
+  const PULL_PX = 90;
+  // Passerelle fournie par l'appli Android (absente dans un navigateur).
+  const APP = window.VeilleApp || null;
   const PLACE = { name: 'Alençon', lat: 48.4329, lon: 0.0918 };
 
   const TYPES = {
     alerte: 'Alerte CERT-FR',
     kev: 'Faille exploitée',
+    cve: 'CVE critique',
     avis: 'Avis CERT-FR',
     cti: 'Menace / incident',
     vuln: 'Vulnérabilité',
     actualite: 'Actualité CERT-FR',
   };
-  const TYPE_WEIGHT = { alerte: 50, kev: 40, cti: 25, avis: 20, vuln: 15, actualite: 10 };
+  const TYPE_WEIGHT = { alerte: 50, kev: 40, cti: 25, avis: 20, cve: 18, vuln: 15, actualite: 10 };
 
   const DEFAULT_TITLE = 'Tableau de bord · Veille';
   // Liste de départ volontairement générique : à adapter dans Réglages (reste sur la tablette).
@@ -76,9 +82,10 @@
     try {
       const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
       const watch = s.watch && typeof s.watch === 'object' && Object.keys(s.watch).length ? s.watch : DEFAULT_WATCH;
-      return { title: (s.title || '').trim() || DEFAULT_TITLE, watch, theme: s.theme === 'dark' ? 'dark' : 'light' };
+      const rotate = ROTATE_CHOICES.some(([v]) => v === Number(s.rotate)) ? Number(s.rotate) : 0;
+      return { title: (s.title || '').trim() || DEFAULT_TITLE, watch, theme: s.theme === 'dark' ? 'dark' : 'light', rotate };
     } catch (e) {
-      return { title: DEFAULT_TITLE, watch: DEFAULT_WATCH, theme: 'light' };
+      return { title: DEFAULT_TITLE, watch: DEFAULT_WATCH, theme: 'light', rotate: 0 };
     }
   }
 
@@ -131,9 +138,13 @@
     return out;
   }
 
+  // Faille activement exploitée (CISA KEV) qui touche un logiciel suivi : la priorité absolue.
+  const isHot = (it) => it.type === 'kev' && it.matches && it.matches.length > 0;
+
   function scoreOf(it) {
     let s = TYPE_WEIGHT[it.type] || 10;
     if (it.matches.length) s += 35;
+    if (isHot(it)) s += 20;
     if (it.ransomware) s += 10;
     const ageDays = Math.max(0, (Date.now() - it._d) / DAY);
     return s - Math.min(ageDays * 3, 30);
@@ -233,10 +244,11 @@
   const badge = (text, cls) => el('span', 'badge ' + cls, text);
 
   function itemNode(it) {
-    const li = el('li', 'item t-' + it.type);
+    const li = el('li', 'item t-' + it.type + (isHot(it) ? ' hot' : ''));
     li.tabIndex = 0;
     li.append(el('div', 'title', tTitle(it)));
     const meta = el('div', 'meta');
+    if (isHot(it)) meta.append(badge('⚠ Exploitée · nos logiciels', 'b-hot'));
     meta.append(badge(it.type === 'news' ? it.source : (TYPES[it.type] || it.type), 'b-' + it.type));
     if (it.ransomware) meta.append(badge('Rançongiciel connu', 'b-ransom'));
     if (it.lang === 'en' && !it.title_fr) meta.append(badge('En anglais', 'b-actualite'));
@@ -263,9 +275,30 @@
     items.forEach((it) => ul.append(itemNode(it)));
   }
 
+  // Pastille « Mis à jour il y a X min » : verte < 30 min, orange ensuite, rouge au-delà de STALE_HOURS.
+  function renderFresh() {
+    const top = $('.top');
+    if (!top) return;
+    let f = $('#fresh');
+    if (!f) {
+      f = el('div', 'fresh');
+      f.id = 'fresh';
+      f.setAttribute('role', 'status');
+      top.insertBefore(f, $('#stale'));
+    }
+    if (!DATA || !DATA.generated) { f.hidden = true; return; }
+    const last = new Date(DATA.generated);
+    const min = (Date.now() - last) / 60000;
+    f.hidden = false;
+    f.className = 'fresh ' + (min < 30 ? 'ok' : min < STALE_HOURS * 60 ? 'warn' : 'bad');
+    f.textContent = 'Mis à jour ' + ago(last);
+    f.title = 'Dernière collecte des sources : ' + fmtDateTime(last);
+  }
+
   function renderStatusBar() {
     const stale = $('#stale');
     const foot = $('#foot');
+    renderFresh();
     foot.replaceChildren();
     if (!DATA) {
       stale.hidden = false;
@@ -434,6 +467,7 @@
   /* ---------- météo (Open-Meteo, direct depuis la tablette) ---------- */
 
   let WX = null;
+  let wxTried = false;
   const WX_KEY = 'veille.wx';
 
   async function loadWeather() {
@@ -454,6 +488,7 @@
     } catch (e) {
       try { WX = JSON.parse(localStorage.getItem(WX_KEY) || 'null'); } catch (e2) { WX = null; }
     }
+    wxTried = true;
     renderWeather();
   }
 
@@ -480,6 +515,23 @@
     return h > STALE_HOURS ? el('div', 'stale-note', `Météo mise à jour il y a ${Math.round(h)} h`) : null;
   }
 
+  // Vigilance Météo-France (via Meteoalarm, collectée par GitHub Actions).
+  function vigiNode(full) {
+    const list = (DATA && DATA.vigilance) || [];
+    if (!list.length) return null;
+    const box = el('div', 'vigi');
+    list.slice(0, full ? 6 : 2).forEach((v) => {
+      const row = el('div', 'vigi-item v-' + v.level);
+      row.append(el('span', 'vigi-dot'), el('b', '', `Vigilance ${v.level}`), el('span', '', v.event));
+      if (full && v.expires) {
+        row.append(el('span', 'vigi-when', "jusqu'au " + new Date(v.expires).toLocaleString('fr-FR',
+          { weekday: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: TZ })));
+      }
+      box.append(row);
+    });
+    return box;
+  }
+
   function renderWeather() {
     const compact = $('#weather');
     const full = $('#wx-full');
@@ -487,6 +539,8 @@
     if (!WX) {
       if (compact) compact.append(el('div', 'meta', 'Météo indisponible'));
       if (full) full.append(el('h2', '', 'Météo indisponible'));
+      const v = vigiNode(!!full);
+      if (v) (full || compact).append(v);
       return;
     }
     const cur = WX.current;
@@ -501,13 +555,18 @@
       now.append(el('div', 'icon', icon), info);
       const hours = el('div', 'hours');
       for (let i = start + 1; i <= start + 6 && i < WX.hourly.time.length; i++) hours.append(hourCell(i));
-      compact.append(now, hours);
+      compact.append(now);
+      const vigi = vigiNode(false);
+      if (vigi) compact.append(vigi);
+      compact.append(hours);
       const note = staleNote();
       if (note) compact.append(note);
     }
 
     if (full) {
       full.append(el('h2', '', `Météo · ${PLACE.name}`));
+      const vigi = vigiNode(true);
+      if (vigi) full.append(vigi);
       const grid = el('div', 'wx-grid');
       const left = el('div');
       const now = el('div', 'wx-now');
@@ -713,6 +772,7 @@
     renderKpis();
     const top = SEC.filter((i) => within(i, 7)).sort((a, b) => scoreOf(b) - scoreOf(a)).slice(0, 6);
     fillList($('#top'), top, 'Rien de marquant cette semaine.', 'sec');
+    if (WX || wxTried) renderWeather(); // affiche la vigilance dès l'arrivée des données
     renderDeadlines();
     renderServices();
     renderNews();
@@ -784,6 +844,145 @@
     fillList(list, rows.slice(0, 150), 'Aucun résultat avec ces filtres.', 'sec');
   }
 
+  /* ---------- tendance sur 30 jours (barres empilées par jour) ---------- */
+
+  const TREND_DAYS = 30;
+  const TREND_SERIES = [
+    { key: 'alerte', label: 'Alertes CERT-FR', color: 'var(--red)', test: (t) => t === 'alerte' },
+    { key: 'avis', label: 'Avis CERT-FR', color: 'var(--accent)', test: (t) => t === 'avis' },
+    { key: 'kev', label: 'Failles exploitées', color: 'var(--orange)', test: (t) => t === 'kev' },
+    { key: 'cve', label: 'CVE critiques', color: 'var(--rose)', test: (t) => t === 'cve' },
+    { key: 'other', label: 'Autres', color: 'var(--gray)', test: () => true },
+  ];
+  const parisDay = (d) => d.toLocaleDateString('en-CA', { timeZone: TZ });
+
+  function svgEl(tag, attrs) {
+    const n = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+    return n;
+  }
+
+  // Rectangle à coins supérieurs arrondis (extrémité de la barre), base droite sur l'axe.
+  function topRounded(x, y, w, h, r) {
+    r = Math.min(r, w / 2, h);
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  }
+
+  function renderTrend() {
+    const box = $('#trend');
+    if (!box) return;
+    box.replaceChildren(el('h2', '', `Tendance sur ${TREND_DAYS} jours`));
+    if (!DATA) return;
+
+    const today = parisToday();
+    const days = [];
+    for (let i = TREND_DAYS - 1; i >= 0; i--) {
+      const d = new Date(today.getTime() - i * DAY);
+      days.push({ key: d.toISOString().slice(0, 10), date: d, counts: TREND_SERIES.map(() => 0), total: 0 });
+    }
+    const byKey = Object.fromEntries(days.map((d) => [d.key, d]));
+    const totals = TREND_SERIES.map(() => 0);
+    SEC.forEach((it) => {
+      const d = byKey[parisDay(it._d)];
+      if (!d) return;
+      const s = TREND_SERIES.findIndex((x) => x.test(it.type));
+      d.counts[s]++; d.total++; totals[s]++;
+    });
+
+    // Légende (avec total 30 jours) : l'identité n'est jamais portée par la couleur seule.
+    const legend = el('div', 'legend');
+    TREND_SERIES.forEach((s, i) => {
+      const k = el('span', 'key');
+      const sw = el('span', 'sw');
+      sw.style.background = s.color;
+      k.append(sw, el('span', '', s.label), el('b', '', String(totals[i])));
+      legend.append(k);
+    });
+    box.append(legend);
+
+    const W = 1000, H = 190, L = 34, R = 6, T = 8, B = 26;
+    const pw = W - L - R, ph = H - T - B;
+    const max = Math.max(4, ...days.map((d) => d.total));
+    const step = Math.ceil(max / 4);
+    const top = step * 4;
+    const y = (v) => T + ph - (v / top) * ph;
+    const slot = pw / TREND_DAYS;
+    const bw = Math.max(6, slot - 6);
+
+    const wrap = el('div', 'trend-wrap');
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Publications par jour sur ${TREND_DAYS} jours` });
+    for (let v = 0; v <= top; v += step) {
+      svg.append(svgEl('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: v ? 'grid' : 'axis' }));
+      const t = svgEl('text', { x: L - 8, y: y(v) + 4, class: 'tick', 'text-anchor': 'end' });
+      t.textContent = String(v);
+      svg.append(t);
+    }
+    const tip = el('div', 'tip');
+    tip.hidden = true;
+
+    days.forEach((d, i) => {
+      const x = L + i * slot + (slot - bw) / 2;
+      let base = y(0);
+      const visible = TREND_SERIES.map((s, j) => j).filter((j) => d.counts[j]);
+      visible.forEach((j, n) => {
+        const h = (d.counts[j] / top) * ph;
+        const gap = n ? 2 : 0;                    // 2 px de fond entre segments
+        const isTop = n === visible.length - 1;
+        const hh = Math.max(1, h - gap);
+        const p = svgEl('path', { d: isTop ? topRounded(x, base - h, bw, hh, 4) : `M${x},${base - h}h${bw}v${hh}h${-bw}Z` });
+        p.style.fill = TREND_SERIES[j].color;
+        svg.append(p);
+        base -= h;
+      });
+      if (i % 7 === (TREND_DAYS - 1) % 7) {
+        const t = svgEl('text', { x: x + bw / 2, y: H - 6, class: 'tick', 'text-anchor': 'middle' });
+        t.textContent = d.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+        svg.append(t);
+      }
+      // Zone de survol plus large que la barre.
+      const hit = svgEl('rect', { x: L + i * slot, y: T, width: slot, height: ph, class: 'hit' });
+      const show = () => {
+        tip.replaceChildren(el('div', 'tip-h', cap(d.date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }))));
+        TREND_SERIES.forEach((s, j) => {
+          if (!d.counts[j]) return;
+          const r = el('div', 'tip-r');
+          const sw = el('span', 'sw');
+          sw.style.background = s.color;
+          r.append(sw, el('span', '', s.label), el('b', '', String(d.counts[j])));
+          tip.append(r);
+        });
+        tip.append(el('div', 'tip-t', d.total ? `Total : ${d.total}` : 'Aucune publication'));
+        tip.hidden = false;
+        const frac = (i + 0.5) / TREND_DAYS;
+        tip.style.left = `${(L + frac * pw) / W * 100}%`;
+        tip.classList.toggle('left', frac > 0.6);
+      };
+      hit.addEventListener('pointerenter', show);
+      hit.addEventListener('click', show);
+      svg.append(hit);
+    });
+    svg.addEventListener('pointerleave', () => { tip.hidden = true; });
+    wrap.append(svg, tip);
+    box.append(wrap);
+
+    // Vue tableau (accessibilité).
+    const det = el('details', 'trend-table');
+    det.append(el('summary', '', 'Voir les chiffres'));
+    const table = el('table');
+    const head = el('tr');
+    ['Jour', ...TREND_SERIES.map((s) => s.label), 'Total'].forEach((h) => head.append(el('th', '', h)));
+    table.append(head);
+    days.slice().reverse().filter((d) => d.total).forEach((d) => {
+      const tr = el('tr');
+      tr.append(el('td', '', d.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' })));
+      d.counts.forEach((c) => tr.append(el('td', '', String(c))));
+      tr.append(el('td', '', String(d.total)));
+      table.append(tr);
+    });
+    det.append(table);
+    box.append(det);
+  }
+
   /* ---------- infos ---------- */
 
   function renderInfos() {
@@ -828,13 +1027,29 @@
       });
     };
     drawTheme();
+    let rotate = SETTINGS.rotate;
+    const drawRotate = () => {
+      const box = $('#set-rotate');
+      box.replaceChildren();
+      ROTATE_CHOICES.forEach(([v, label]) => {
+        box.append(chip(label, rotate === v, () => {
+          rotate = v;
+          patchSettings({ rotate: v });
+          SETTINGS.rotate = v;
+          drawRotate();
+        }));
+      });
+    };
+    drawRotate();
     $('#save').addEventListener('click', () => {
       const watch = parseWatch($('#set-watch').value);
       if (!Object.keys(watch).length) { saved.textContent = 'Au moins un groupe est nécessaire (Nom: mot1, mot2).'; return; }
       const ok = patchSettings({ title: $('#set-title').value.trim(), watch });
       saved.textContent = ok ? 'Enregistré.' : "Impossible d'enregistrer sur cet appareil.";
       if (ok) $('#brand').textContent = $('#set-title').value.trim() || DEFAULT_TITLE;
+      if (ok) shareWatch(watch);
     });
+    initAppSettings();
     $('#reset').addEventListener('click', () => {
       $('#set-title').value = DEFAULT_TITLE;
       $('#set-watch').value = watchToText(DEFAULT_WATCH);
@@ -847,13 +1062,89 @@
     });
   }
 
+  /* ---------- appli Android : réglages propres à la tablette ---------- */
+
+  // La liste des logiciels suivis est transmise à l'appli (sur la tablette uniquement)
+  // pour repérer les alertes en arrière-plan.
+  function shareWatch(watch) {
+    if (!APP) return;
+    try { APP.setWatch(JSON.stringify(watch)); } catch (e) { /* ignoré */ }
+  }
+
+  function initAppSettings() {
+    const panel = $('#app-panel');
+    if (!panel || !APP) return;
+    let cfg;
+    try { cfg = JSON.parse(APP.getConfig()); } catch (e) { return; }
+    panel.hidden = false;
+    const save = () => { try { APP.setConfig(JSON.stringify(cfg)); } catch (e) { /* ignoré */ } };
+    const draw = () => {
+      panel.querySelectorAll('[data-opt]').forEach((box) => {
+        const key = box.dataset.opt;
+        box.replaceChildren();
+        [[true, 'Oui'], [false, 'Non']].forEach(([v, label]) => {
+          box.append(chip(label, !!cfg[key] === v, () => { cfg[key] = v; save(); draw(); }));
+        });
+      });
+      $('#night-times').hidden = !cfg.night;
+    };
+    $('#night-start').value = cfg.nightStart || '20:00';
+    $('#night-end').value = cfg.nightEnd || '07:00';
+    ['night-start', 'night-end'].forEach((id) => {
+      $('#' + id).addEventListener('change', () => {
+        cfg.nightStart = $('#night-start').value || '20:00';
+        cfg.nightEnd = $('#night-end').value || '07:00';
+        save();
+      });
+    });
+    $('#notif-test').addEventListener('click', () => { try { APP.testNotification(); } catch (e) { /* ignoré */ } });
+    $('#app-version').textContent = 'Appli Android ' + (cfg.version || '');
+    draw();
+  }
+
+  /* ---------- actualiser en tirant vers le bas ---------- */
+
+  async function refreshAll() {
+    if (WX) WX.fetched = 0;
+    await Promise.all([load(), loadWeather()]);
+  }
+
+  function initPull() {
+    const ind = el('div', 'ptr');
+    ind.setAttribute('aria-hidden', 'true');
+    document.documentElement.append(ind);   // hors du <body> : survit à la navigation douce
+    let y0 = null, dy = 0, busy = false;
+    const hide = () => { ind.classList.remove('show'); ind.style.transform = ''; };
+    document.addEventListener('touchstart', (e) => {
+      const modal = $('#modal');
+      y0 = (!busy && window.scrollY <= 0 && (!modal || modal.hidden) && e.touches.length === 1) ? e.touches[0].clientY : null;
+      dy = 0;
+    }, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+      if (y0 === null) return;
+      dy = e.touches[0].clientY - y0;
+      if (dy <= 10) { hide(); return; }
+      ind.classList.add('show');
+      ind.style.transform = `translate(-50%, ${Math.min(dy, PULL_PX * 1.4) * 0.6}px)`;
+      ind.textContent = dy > PULL_PX ? '↻ Relâcher pour actualiser' : '↓ Tirer pour actualiser';
+    }, { passive: true });
+    document.addEventListener('touchend', async () => {
+      if (y0 === null) return;
+      y0 = null;
+      if (dy <= PULL_PX) { hide(); return; }
+      busy = true;
+      ind.textContent = 'Actualisation…';
+      try { await refreshAll(); } finally { busy = false; setTimeout(hide, 400); }
+    });
+  }
+
   /* ---------- démarrage ---------- */
 
   function render() {
     if (!$('#stale')) return;
     renderStatusBar();
     if (page === 'home') renderHome();
-    else if (page === 'veille') renderVeille();
+    else if (page === 'veille') { renderTrend(); renderVeille(); }
     else if (page === 'infos') renderInfos();
     else if (page === 'reglages') renderSettings();
   }
@@ -881,7 +1172,7 @@
   }
 
   function initFullscreen() {
-    if (!document.documentElement.requestFullscreen) return;
+    if (APP || !document.documentElement.requestFullscreen) return; // l'appli Android est déjà en plein écran
     if (window.matchMedia && matchMedia('(display-mode: fullscreen)').matches) return; // appli installée déjà en plein écran
     const top = $('.top');
     if (!top) return;
@@ -919,7 +1210,8 @@
       document.body.dataset.page = next;
       page = next;
       document.title = doc.title;
-      if (push) history.pushState(null, '', url.href);
+      if (push === 'replace') history.replaceState(null, '', url.href);
+      else if (push) history.pushState(null, '', url.href);
       window.scrollTo(0, 0);
       boot();
     } catch (e) {
@@ -932,9 +1224,21 @@
   /* ---------- démarrage ---------- */
 
   let idle;
+  // Sans interaction : défilement automatique Accueil → Veille → Infos (si activé),
+  // sinon retour à l'accueil après IDLE_RETURN_MS. Jamais pendant la lecture d'un détail.
   function resetIdle() {
     clearTimeout(idle);
-    if (page !== 'home') idle = setTimeout(() => navigate('index.html', true), IDLE_RETURN_MS);
+    const rotate = SETTINGS.rotate;
+    if (rotate && page !== 'reglages') {
+      idle = setTimeout(() => {
+        const modal = $('#modal');
+        if (modal && !modal.hidden) { resetIdle(); return; }
+        const cur = Object.keys(PAGES).find((k) => PAGES[k] === page);
+        navigate(ROTATION[(ROTATION.indexOf(cur) + 1) % ROTATION.length], 'replace');
+      }, rotate * 1000);
+    } else if (page !== 'home') {
+      idle = setTimeout(() => navigate('index.html', true), IDLE_RETURN_MS);
+    }
   }
 
   // À chaque affichage d'une page.
@@ -944,6 +1248,7 @@
     if (DATA) DATA.items.forEach((i) => { i.matches = i.type === 'news' ? [] : findMatches(i); });
     $('#brand').textContent = SETTINGS.title;
     document.documentElement.dataset.theme = SETTINGS.theme;
+    shareWatch(SETTINGS.watch);
     $('#close').addEventListener('click', closeModal);
     $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
     initFullscreen();
@@ -975,8 +1280,12 @@
     ['touchstart', 'click', 'keydown', 'scroll'].forEach((ev) => document.addEventListener(ev, resetIdle, { passive: true }));
 
     setInterval(tick, 1000);
+    setInterval(renderFresh, 30 * 1000);
     setInterval(load, REFRESH_MS);
     setInterval(loadWeather, WEATHER_MS);
+    initPull();
+    // L'appli Android signale la fin du mode nuit : on rafraîchit tout de suite.
+    window.addEventListener('veilleapp:wake', () => { refreshAll(); });
 
     // Écran toujours allumé (quand le navigateur le permet).
     const keepAwake = async () => {
