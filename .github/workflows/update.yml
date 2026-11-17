@@ -2,13 +2,15 @@ name: Mise à jour des données de veille
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - "config.json"
       - "scripts/**"
       - "requirements-translate.txt"
+      - ".github/workflows/update.yml"
 
 permissions:
   contents: write
@@ -16,6 +18,9 @@ permissions:
 concurrency:
   group: veille-update
   cancel-in-progress: false
+
+env:
+  REMOTE: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
 
 jobs:
   update:
@@ -29,6 +34,9 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: requirements-translate.txt
+
+      - name: Récupérer les données précédentes
+        run: sh scripts/restore_data.sh "$REMOTE"
 
       - name: Collecte des flux
         run: python scripts/fetch_feeds.py
@@ -56,16 +64,6 @@ jobs:
         continue-on-error: true
         run: python scripts/translate_items.py
 
-      - name: Publier data.json
+      - name: Publier data.json (branche data)
         if: always()
-        run: |
-          git config user.name "veille-bot"
-          git config user.email "veille-bot@users.noreply.github.com"
-          git add data.json || true
-          if git diff --cached --quiet; then
-            echo "Rien de nouveau."
-          else
-            git commit -m "Mise à jour des données"
-            git pull --rebase origin main || true
-            git push
-          fi
+        run: sh scripts/publish_data.sh "$REMOTE"

@@ -80,3 +80,17 @@ Si une source est en échec, elle apparaît en orange en bas de page et dans Ré
 - La vigilance météo officielle (Météo-France) n'est pas incluse : elle demande une clé d'API.
 - Si les mises à jour s'arrêtent, regarder l'onglet **Actions** du dépôt (GitHub peut suspendre
   les tâches planifiées d'un dépôt resté inactif).
+
+## Mise à jour toutes les 5 minutes (v2.3)
+
+- Le workflow GitHub Actions s'exécute toutes les 5 minutes. Les délais de GitHub sont « au mieux » : comptez en pratique 5 à 15 minutes entre deux collectes.
+- Les données sont publiées sur la branche `data` (un seul commit, remplacé à chaque fois), pour ne pas reconstruire le site à chaque collecte. L'appli lit `data.json` sur cette branche (cache du CDN d'environ 5 minutes) et se rabat sur `data.json` de `main` si la branche n'existe pas encore.
+- L'appli recharge les données toutes les 5 minutes et au retour au premier plan.
+
+## Plein écran et navigation
+
+Le bouton « Plein écran » (en haut à droite) bascule le navigateur en plein écran. La navigation entre les pages se fait sans rechargement pour que le plein écran reste actif.
+
+## Conseils de protection
+
+Chaque vulnérabilité affiche des conseils généraux (équipe informatique / utilisateurs) déduits par règles du type de faille et du produit. Ils ne remplacent pas l'avis officiel (bouton « Lien »).

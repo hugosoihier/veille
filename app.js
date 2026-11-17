@@ -1,15 +1,16 @@
 (() => {
   'use strict';
 
-  const page = document.body.dataset.page;
+  let page = document.body.dataset.page;
   const DAY = 864e5;
   const TZ = 'Europe/Paris';
   const REFRESH_MS = 5 * 60 * 1000;
   const WEATHER_MS = 15 * 60 * 1000;
   const IDLE_RETURN_MS = 3 * 60 * 1000;
-  const RELOAD_HOME_MS = 6 * 3600 * 1000; // récupère les nouvelles versions de l'appli
+  const SW_CHECK_MS = 30 * 60 * 1000; // cherche une nouvelle version de l'appli
+  const PAGES = { 'index.html': 'home', 'veille.html': 'veille', 'infos.html': 'infos', 'reglages.html': 'reglages' };
   const STALE_HOURS = 3;
-  const APP_VERSION = '2.2';
+  const APP_VERSION = '2.3';
   const PLACE = { name: 'Alençon', lat: 48.4329, lon: 0.0918 };
 
   const TYPES = {
@@ -101,9 +102,7 @@
 
   const watchToText = (watch) => Object.entries(watch).map(([g, w]) => `${g}: ${w.join(', ')}`).join('\n');
 
-  const SETTINGS = loadSettings();
-  $('#brand').textContent = SETTINGS.title;
-  document.documentElement.dataset.theme = SETTINGS.theme;
+  let SETTINGS = loadSettings();
 
   /* ---------- repérage du périmètre ---------- */
 
@@ -119,7 +118,7 @@
     return out;
   }
 
-  const WATCH = compileWatch(SETTINGS.watch);
+  let WATCH = compileWatch(SETTINGS.watch);
 
   function findMatches(it) {
     const text = `${it.title} ${it.summary} ${it.title_fr || ''} ${it.summary_fr || ''}`;
@@ -147,19 +146,44 @@
   let NEWS = [];
   let LOAD_ERROR = {};
 
-  async function load() {
-    try {
-      const res = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) { LOAD_ERROR = { status: res.status }; throw new Error('http'); }
-      LOAD_ERROR = {};
-      const d = await res.json();
-      d.items.forEach((i) => { i._d = new Date(i.date); i.matches = i.type === 'news' ? [] : findMatches(i); });
-      DATA = d;
-      SEC = d.items.filter((i) => i.type !== 'news');
-      NEWS = d.items.filter((i) => i.type === 'news').sort((a, b) => b._d - a._d);
-    } catch (e) {
-      // on garde les dernières données déjà affichées
+  // Les données sont publiées sur la branche « data » du dépôt (mise à jour toutes les 5 min,
+  // sans reconstruire le site). Si elle n'existe pas encore, on se rabat sur data.json du site.
+  function dataUrls() {
+    const urls = [];
+    const m = location.hostname.match(/^([^.]+)\.github\.io$/i);
+    const repo = location.pathname.split('/')[1];
+    if (m && repo && !repo.includes('.')) urls.push(`https://raw.githubusercontent.com/${m[1]}/${repo}/data/data.json`);
+    urls.push('data.json');
+    return urls;
+  }
+
+  async function fetchData() {
+    let last = {};
+    for (const u of dataUrls()) {
+      try {
+        const res = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) { LOAD_ERROR = {}; return await res.json(); }
+        last = { status: res.status };
+      } catch (e) {
+        last = {};
+      }
     }
+    LOAD_ERROR = last;
+    return null;
+  }
+
+  function prepare() {
+    DATA.items.forEach((i) => { i._d = new Date(i.date); i.matches = i.type === 'news' ? [] : findMatches(i); });
+    SEC = DATA.items.filter((i) => i.type !== 'news');
+    NEWS = DATA.items.filter((i) => i.type === 'news').sort((a, b) => b._d - a._d);
+  }
+
+  async function load() {
+    const d = await fetchData();
+    if (d && Array.isArray(d.items)) {
+      DATA = d;
+      prepare();
+    } // sinon : on garde les dernières données déjà affichées
     render();
   }
 
@@ -181,7 +205,7 @@
     if (LOAD_ERROR.status === 404) {
       return notice('Fichier de données introuvable (data.json)', [
         "La première collecte n'a pas encore eu lieu, ou elle a échoué.",
-        'Sur GitHub : onglet Actions → « Mise à jour des données de veille » → Run workflow.',
+        'Sur GitHub : onglet Actions → « Mise à jour des données de veille » → Run workflow (crée la branche data).',
         'Vérifiez aussi Settings → Actions → General → Workflow permissions : « Read and write permissions ».',
         'Attendez une minute, puis rouvrez l’appli.',
       ]);
@@ -260,6 +284,104 @@
       : `${entries.length} sources actives`));
   }
 
+
+  /* ---------- conseils de protection ---------- */
+
+  const has = (re, t) => re.test(t);
+  const CATS = [
+    { re: /windows|microsoft|exchange|sharepoint|active directory|hyper-v|\.net|outlook|office 365|microsoft 365/,
+      it: ["Déployer les mises à jour de sécurité Microsoft (WSUS / Windows Update) en commençant par les serveurs exposés.", "Vérifier que les postes et serveurs concernés sont bien redémarrés après l'installation du correctif."],
+      user: ["Accepter les mises à jour Windows et redémarrer l'ordinateur quand il le demande.", "Ne pas ouvrir de pièce jointe Office ni activer les macros sans raison claire."] },
+    { re: /chrome|chromium|firefox|safari|webkit|navigateur|browser|edge\b/,
+      it: ["Mettre à jour le navigateur sur tous les postes (version corrigée indiquée par l'éditeur).", "Vérifier que le navigateur se met à jour automatiquement."],
+      user: ["Redémarrer le navigateur dès qu'il propose une mise à jour.", "Éviter les sites inconnus et ne pas installer d'extension non validée."] },
+    { re: /thunderbird|messagerie|zimbra|postfix|webmail|mail server/,
+      it: ["Mettre à jour le client ou le serveur de messagerie concerné.", "Renforcer le filtrage des pièces jointes et des liens côté passerelle de messagerie."],
+      user: ["Se méfier des messages inattendus : vérifier l'expéditeur avant d'ouvrir un lien ou une pièce jointe.", "Signaler tout message suspect au lieu de le transférer."] },
+    { re: /fortinet|fortigate|fortios|cisco|palo alto|pan-os|juniper|big-ip|sonicwall|ivanti|citrix|netscaler|pulse secure|vpn|firewall|pare-feu|routeur|router|switch|opnsense|pfsense|check point|watchguard|ssl-vpn/,
+      it: ["Mettre à jour le firmware de l'équipement réseau concerné (VPN, pare-feu, routeur) vers la version corrigée.", "Si le correctif n'est pas disponible : limiter l'exposition (administration depuis le réseau interne seulement) et appliquer le contournement de l'éditeur.", "Contrôler les journaux d'accès et les comptes de l'équipement à la recherche d'activité inhabituelle."],
+      user: ["Utiliser uniquement les accès VPN fournis par le service informatique.", "Signaler toute coupure ou lenteur anormale de la connexion."] },
+    { re: /vmware|esxi|vcenter|proxmox|veeam|synology|qnap|nutanix|\bnas\b|sauvegarde|backup|virtualis/,
+      it: ["Mettre à jour l'hyperviseur, la plateforme de sauvegarde ou le NAS concerné et n'exposer ses interfaces d'administration qu'au réseau interne.", "Vérifier qu'une sauvegarde récente, hors ligne ou isolée, existe et qu'elle peut être restaurée."],
+      user: ["Ne pas stocker de fichiers importants uniquement sur son poste : utiliser les espaces de stockage prévus."] },
+    { re: /linux|kernel|noyau|apache|nginx|openssl|openssh|tomcat|\bphp\b|java|jenkins|gitlab|docker|kubernetes|redis|mysql|postgres|wordpress|drupal|ubuntu|debian|red hat|rhel/,
+      it: ["Appliquer les correctifs de la distribution ou du logiciel serveur concerné, puis redémarrer le service.", "Vérifier les versions installées (gestionnaire de paquets) et retirer les composants inutilisés."],
+      user: ["Pas d'action particulière côté utilisateur : signaler tout service indisponible au service informatique."] },
+    { re: /adobe|acrobat|reader|libreoffice|7-zip|winrar|pdf/,
+      it: ["Mettre à jour le logiciel de lecture ou de compression concerné sur le parc."],
+      user: ["Ouvrir uniquement les documents et archives reçus d'une source connue.", "Mettre à jour le logiciel quand il le propose."] },
+    { re: /putty|winscp|filezilla|teamviewer|anydesk|connectwise|screenconnect|manageengine|zabbix|centreon|glpi|\bvnc\b|\brdp\b|remote desktop|bureau à distance/,
+      it: ["Mettre à jour l'outil d'administration ou de prise en main à distance, et ne jamais l'exposer directement sur Internet.", "Limiter les comptes autorisés et activer l'authentification à deux facteurs quand c'est possible."],
+      user: ["N'accepter une prise en main à distance que si elle a été demandée au service informatique."] },
+    { re: /android|\bios\b|iphone|ipad|samsung|mobile/,
+      it: ["Mettre à jour les appareils mobiles concernés (gestion centralisée si elle existe)."],
+      user: ["Installer la dernière mise à jour du téléphone ou de la tablette.", "Installer des applications uniquement depuis la boutique officielle."] },
+    { re: /okta|keycloak|ldap|saml|oauth|\bsso\b|kerberos|entra|authentification|authentication|identity|identité/,
+      it: ["Mettre à jour le service d'authentification et envisager la rotation des secrets et sessions s'il a été exposé.", "Surveiller les connexions inhabituelles (horaires, provenances)."],
+      user: ["Utiliser un mot de passe unique et robuste, et changer le mot de passe si le service informatique le demande."] },
+    { re: /scada|siemens|schneider|industrial|industriel|automate/,
+      it: ["Isoler les équipements industriels du réseau général et appliquer les consignes de l'éditeur."],
+      user: ["Pas d'action particulière côté utilisateur."] },
+  ];
+  const CLASSES = [
+    { re: /remote code|code arbitraire|exécution de code|execute arbitrary|exécution à distance|rce\b/,
+      it: ["Faille permettant d'exécuter du code à distance : traiter en priorité les systèmes accessibles depuis Internet."],
+      user: ["Ne pas cliquer sur un lien ou une pièce jointe inattendu : c'est le moyen le plus courant d'exploiter ce type de faille."] },
+    { re: /privilege|élévation de privilèges|escalation/,
+      it: ["Faille d'élévation de privilèges : limiter les droits administrateur et vérifier les comptes à privilèges."],
+      user: ["Travailler avec un compte sans droits d'administrateur au quotidien."] },
+    { re: /denial of service|déni de service|\bdos\b/,
+      it: ["Risque d'indisponibilité du service : prévoir le correctif et surveiller la charge et les plantages."],
+      user: ["En cas d'indisponibilité du service, prévenir le service informatique plutôt que de réessayer en boucle."] },
+    { re: /bypass|contournement|auth.{0,15}(bypass|contourn)|authentification/,
+      it: ["Faille de contournement de protection ou d'authentification : vérifier les accès récents et renforcer l'authentification (double facteur)."],
+      user: ["Activer la double authentification quand elle est proposée."] },
+    { re: /information disclosure|divulgation|atteinte à la confidentialité|exposure|fuite|leak/,
+      it: ["Risque de fuite d'informations : limiter l'accès aux données sensibles et vérifier les journaux."],
+      user: ["Ne pas partager d'informations sensibles par des canaux non validés."] },
+    { re: /injection|\bsql\b|xss|cross-site|path traversal|traversée|deserializ|désérialis/,
+      it: ["Faille d'injection ou de script : mettre à jour l'application web et filtrer les accès par un pare-feu applicatif si possible."],
+      user: ["Éviter de cliquer sur des liens longs ou étranges menant à un site connu."] },
+    { re: /phishing|hameçonnage|usurpation|spoof/,
+      it: ["Rappeler les consignes anti-hameçonnage et renforcer le filtrage des messages."],
+      user: ["Vérifier l'adresse de l'expéditeur et ne jamais saisir son mot de passe depuis un lien reçu par message."] },
+  ];
+
+  function adviceFor(it) {
+    const text = `${it.title} ${it.summary || ''} ${it.title_fr || ''} ${it.summary_fr || ''} ${it.action || ''}`.toLowerCase();
+    const itTips = [];
+    const userTips = [];
+    if (it.type === 'kev' || it.ransomware) {
+      itTips.push("Priorité maximale : cette faille est déjà exploitée par des attaquants. Appliquer le correctif ou la mesure de contournement sans attendre.");
+    } else if (it.type === 'alerte') {
+      itTips.push("Alerte officielle : vérifier si le produit est présent dans le parc et appliquer le correctif en priorité.");
+    } else {
+      itTips.push("Vérifier si le produit concerné est utilisé, puis planifier le correctif de l'éditeur.");
+    }
+    if (it.ransomware) itTips.push("Utilisée dans des attaques par rançongiciel : contrôler les sauvegardes et leur isolement.");
+    let matched = false;
+    CATS.forEach((c) => { if (has(c.re, text) && itTips.length < 6) { matched = true; itTips.push(...c.it); userTips.push(...c.user); } });
+    CLASSES.forEach((c) => { if (has(c.re, text)) { itTips.push(...c.it); userTips.push(...c.user); } });
+    if (!matched) itTips.push("Consulter l'avis de l'éditeur (bouton Lien) pour connaître les versions corrigées et les mesures de contournement.");
+    userTips.push("Garder son système et ses logiciels à jour.");
+    userTips.push("En cas de comportement inhabituel (lenteur, message étrange, fenêtre inattendue), arrêter et prévenir le service informatique.");
+    const uniq = (a, n) => Array.from(new Set(a)).slice(0, n);
+    return { it: uniq(itTips, 5), user: uniq(userTips, 5) };
+  }
+
+  function addAdvice(body, it) {
+    const a = adviceFor(it);
+    body.append(el('h4', '', 'Comment se protéger'));
+    [['Équipe informatique', a.it], ['Utilisateurs', a.user]].forEach(([who, tips]) => {
+      if (!tips.length) return;
+      body.append(el('div', 'audience', who));
+      const ul = el('ul', 'tips');
+      tips.forEach((t) => ul.append(el('li', '', t)));
+      body.append(ul);
+    });
+    body.append(el('div', 'note', "Conseils généraux déduits du type de faille et du produit. Suivez toujours l'avis officiel (bouton Lien)."));
+  }
+
   /* ---------- fenêtre de détail ---------- */
 
   function openModal(it) {
@@ -284,6 +406,7 @@
       body.append(el('h4', '', 'Action recommandée'));
       body.append(el('p', '', tAction(it)));
     }
+    if (it.type !== 'news') addAdvice(body, it);
     if (it.cve && it.cve.length) {
       const c = el('div', 'cves');
       it.cve.slice(0, 12).forEach((id) => c.append(el('span', '', id)));
@@ -306,10 +429,7 @@
     $('#modal').hidden = false;
   }
 
-  const closeModal = () => { $('#modal').hidden = true; };
-  $('#close').addEventListener('click', closeModal);
-  $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  const closeModal = () => { const m = $('#modal'); if (m) m.hidden = true; };
 
   /* ---------- météo (Open-Meteo, direct depuis la tablette) ---------- */
 
@@ -318,6 +438,7 @@
 
   async function loadWeather() {
     if (!$('#weather') && !$('#wx-full')) return;
+    if (WX && WX.fetched && Date.now() - WX.fetched < 10 * 60 * 1000) { renderWeather(); return; }
     const url = 'https://api.open-meteo.com/v1/forecast'
       + `?latitude=${PLACE.lat}&longitude=${PLACE.lon}`
       + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,precipitation'
@@ -540,6 +661,7 @@
   /* ---------- accueil ---------- */
 
   function tick() {
+    if (!$('#time')) return;
     const now = new Date();
     $('#time').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
     $('#date').textContent = cap(now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ }));
@@ -598,14 +720,17 @@
 
   /* ---------- veille ---------- */
 
-  const params = new URLSearchParams(location.search);
-  const state = {
-    type: params.get('type') || 'all',
-    period: params.get('period') || '30',
-    group: params.get('group') || 'all',
-    match: params.get('match') === '1',
-    q: '',
-  };
+  let state = null;
+  function initState() {
+    const params = new URLSearchParams(location.search);
+    state = {
+      type: params.get('type') || 'all',
+      period: params.get('period') || '30',
+      group: params.get('group') || 'all',
+      match: params.get('match') === '1',
+      q: '',
+    };
+  }
 
   function chip(label, pressed, onClick) {
     const b = el('button', 'chip', label);
@@ -725,6 +850,7 @@
   /* ---------- démarrage ---------- */
 
   function render() {
+    if (!$('#stale')) return;
     renderStatusBar();
     if (page === 'home') renderHome();
     else if (page === 'veille') renderVeille();
@@ -732,39 +858,149 @@
     else if (page === 'reglages') renderSettings();
   }
 
-  if (page === 'home') {
-    tick();
-    setInterval(tick, 1000);
-    setInterval(() => { if (!$('#modal') || $('#modal').hidden) location.reload(); }, RELOAD_HOME_MS);
+  /* ---------- plein écran ---------- */
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const FS_IN = 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5';
+  const FS_OUT = 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
+
+  function fsSync() {
+    const b = $('.fsbtn');
+    if (!b) return;
+    const on = !!document.fullscreenElement;
+    const label = on ? 'Quitter le plein écran' : 'Plein écran';
+    b.setAttribute('aria-label', label);
+    b.title = label;
+    b.querySelector('path').setAttribute('d', on ? FS_OUT : FS_IN);
+    b.querySelector('span').textContent = label;
   }
-  if (page === 'veille') $('#q').addEventListener('input', (e) => { state.q = e.target.value; renderVeille(); });
-  if (page === 'reglages') initSettings();
-  if (page !== 'home') {
-    let idle;
-    const resetIdle = () => { clearTimeout(idle); idle = setTimeout(() => { location.href = 'index.html'; }, IDLE_RETURN_MS); };
-    ['touchstart', 'click', 'keydown', 'scroll'].forEach((ev) => document.addEventListener(ev, resetIdle, { passive: true }));
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  }
+
+  function initFullscreen() {
+    if (!document.documentElement.requestFullscreen) return;
+    if (window.matchMedia && matchMedia('(display-mode: fullscreen)').matches) return; // appli installée déjà en plein écran
+    const top = $('.top');
+    if (!top) return;
+    const b = el('button', 'fsbtn');
+    b.type = 'button';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(NS, 'path');
+    svg.append(path);
+    b.append(svg, el('span', '', ''));
+    b.addEventListener('click', toggleFullscreen);
+    top.insertBefore(b, $('#stale'));
+    fsSync();
+  }
+
+  /* ---------- navigation sans rechargement (garde le plein écran) ---------- */
+
+  const pageFile = (u) => u.pathname.split('/').pop() || 'index.html';
+  let navigating = false;
+
+  async function navigate(href, push) {
+    if (navigating) return;
+    navigating = true;
+    let url = null;
+    try {
+      url = new URL(href, location.href);
+      const r = await fetch(url.href);
+      if (!r.ok) throw new Error(r.status);
+      const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      const next = doc.body && doc.body.dataset.page;
+      if (!next) throw new Error('page');
+      doc.body.querySelectorAll('script').forEach((n) => n.remove());
+      document.body.replaceChildren(...Array.from(doc.body.childNodes).map((n) => document.adoptNode(n)));
+      document.body.dataset.page = next;
+      page = next;
+      document.title = doc.title;
+      if (push) history.pushState(null, '', url.href);
+      window.scrollTo(0, 0);
+      boot();
+    } catch (e) {
+      location.href = url ? url.href : href;
+    } finally {
+      navigating = false;
+    }
+  }
+
+  /* ---------- démarrage ---------- */
+
+  let idle;
+  function resetIdle() {
+    clearTimeout(idle);
+    if (page !== 'home') idle = setTimeout(() => navigate('index.html', true), IDLE_RETURN_MS);
+  }
+
+  // À chaque affichage d'une page.
+  function boot() {
+    SETTINGS = loadSettings();
+    WATCH = compileWatch(SETTINGS.watch);
+    if (DATA) DATA.items.forEach((i) => { i.matches = i.type === 'news' ? [] : findMatches(i); });
+    $('#brand').textContent = SETTINGS.title;
+    document.documentElement.dataset.theme = SETTINGS.theme;
+    $('#close').addEventListener('click', closeModal);
+    $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
+    initFullscreen();
+    tick();
+    if (page === 'veille') {
+      initState();
+      $('#q').addEventListener('input', (e) => { state.q = e.target.value; renderVeille(); });
+    }
+    if (page === 'reglages') initSettings();
+    render();
+    loadWeather();
     resetIdle();
   }
 
-  // Écran toujours allumé (quand le navigateur le permet).
-  async function keepAwake() {
-    try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (e) { /* ignoré */ }
-  }
-  keepAwake();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
-
-  // Fonctionnement hors connexion + mise à jour automatique de l'appli.
-  if ('serviceWorker' in navigator) {
-    const hadController = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  // Une seule fois.
+  function setup() {
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+      const u = new URL(a.href, location.href);
+      if (u.origin !== location.origin || !PAGES[pageFile(u)]) return;
+      e.preventDefault();
+      navigate(u.href, true);
     });
+    window.addEventListener('popstate', () => navigate(location.href, false));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('fullscreenchange', fsSync);
+    ['touchstart', 'click', 'keydown', 'scroll'].forEach((ev) => document.addEventListener(ev, resetIdle, { passive: true }));
+
+    setInterval(tick, 1000);
+    setInterval(load, REFRESH_MS);
+    setInterval(loadWeather, WEATHER_MS);
+
+    // Écran toujours allumé (quand le navigateur le permet).
+    const keepAwake = async () => {
+      try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (e) { /* ignoré */ }
+    };
+    keepAwake();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') { keepAwake(); load(); }
+    });
+
+    // Fonctionnement hors connexion + mise à jour automatique de l'appli.
+    if ('serviceWorker' in navigator) {
+      const hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        setInterval(() => { reg.update().catch(() => {}); }, SW_CHECK_MS);
+      }).catch(() => {});
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !reloaded) { reloaded = true; location.reload(); }
+      });
+    }
   }
 
+  setup();
+  boot();
   load();
-  setInterval(load, REFRESH_MS);
-  loadWeather();
-  setInterval(loadWeather, WEATHER_MS);
 })();
