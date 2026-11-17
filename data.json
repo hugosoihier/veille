@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-16T16:32:41.572401+00:00",
- "last_success": "2026-11-16T16:32:41.572401+00:00",
+ "generated": "2026-11-17T00:34:47.960474+00:00",
+ "last_success": "2026-11-17T00:34:47.960474+00:00",
  "status": {
   "CERT-FR · Toutes publications": {
    "ok": true,
@@ -64,22 +64,312 @@
    "name": "GitHub",
    "indicator": "none",
    "description": "All Systems Operational",
-   "checked": "2026-11-16T16:32:44.295016+00:00"
+   "checked": "2026-11-17T00:34:51.147900+00:00"
   },
   {
    "name": "Cloudflare",
    "indicator": "minor",
    "description": "Partially Degraded Service",
-   "checked": "2026-11-16T16:32:44.348214+00:00"
+   "checked": "2026-11-17T00:34:51.528375+00:00"
   },
   {
    "name": "Zoom",
-   "indicator": "none",
-   "description": "All Systems Operational",
-   "checked": "2026-11-16T16:32:44.445150+00:00"
+   "indicator": "maintenance",
+   "description": "Service Under Maintenance",
+   "checked": "2026-11-17T00:34:51.796476+00:00"
   }
  ],
  "items": [
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "EN DIRECT, guerre en Ukraine : des frappes russes ont touché deux importants ponts de Kiev, annonce le maire, Vitali Klitschko",
+   "link": "https://www.lemonde.fr/international/live/2026/11/17/en-direct-guerre-en-ukraine-des-frappes-russes-ont-touche-deux-ponts-importants-de-kiev-annonce-le-maire-vitali-klitschko_6810982_3210.html",
+   "date": "2026-11-17T00:13:59+00:00",
+   "summary": "« A la suite de l’attaque ennemie, des systèmes d’infrastructures critiques ont été endommagés », a fait savoir, lundi soir, le maire de la capitale ukrainienne, faisant état de frappes russes ayant « touché les ponts Nord et Sud » de la ville.",
+   "cve": [],
+   "id": "cb9580ec81db"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Au procès de l’interpellation violente de Michel Zecler par des policiers : « Les vidéos parlent d’elles-mêmes, c’est impardonnable, ce n’est même pas de l’amateurisme »",
+   "link": "https://www.lemonde.fr/societe/article/2026/11/17/au-proces-de-l-interpellation-violente-de-michel-zecler-par-des-policiers-les-videos-parlent-d-elles-memes-c-est-impardonnable-ce-n-est-meme-pas-de-l-amateurisme_6812689_3224.html",
+   "date": "2026-11-16T23:36:09+00:00",
+   "summary": "Trois agents sont jugés pour avoir roué de coups le producteur de musique, à Paris, en 2020, et « faux en écriture publique ». Sept fonctionnaires de police, appelés en renfort par les accusés ont livré leur témoignage.",
+   "cve": [],
+   "id": "19632c4d36bd"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Marine Le Pen critiquée en plein débat de la présidentielle pour sa volonté de couper les subventions des associations \"politisées\"",
+   "link": "https://www.franceinfo.fr/elections/marine-le-pen-critiquee-en-plein-debat-de-la-presidentielle-pour-sa-volonte-de-couper-les-subventions-des-associations-politisees_8285558.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T23:08:36+00:00",
+   "summary": "Sur LCI, un front allant de Jean-Luc Mélenchon à Gabriel Attal et passant par Raphaël Glucksmann s'est dressé face à la candidate RN.",
+   "cve": [],
+   "id": "3c63b3358aa4"
+  },
+  {
+   "source": "BleepingComputer",
+   "type": "actualite",
+   "title": "Gemini AI agents repeatedly bypassed safeguards to attack real website",
+   "link": "https://www.bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website/",
+   "date": "2026-11-16T22:54:00+00:00",
+   "summary": "Google's Gemini AI agents repeatedly attempted to hack a real organization's website during AI model safety testing, finding ways to circumvent increasingly restrictive security controls designed to prevent them from accessing live systems. [...]",
+   "cve": [],
+   "id": "60f99194645f"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "\"C'est pire que d'habitude\", \"Ça va être un bazar\"… La fermeture de l'A13 pour neuf mois provoque déjà des bouchons en Île-de-France et inquiète les communes",
+   "link": "https://www.franceinfo.fr/economie/transports/c-est-pire-que-d-habitude-ca-va-etre-un-bazar-la-fermeture-de-l-a13-pour-neuf-mois-provoque-deja-des-bouchons-en-ile-de-france-et-inquiete-les-communes_8285477.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T22:44:34+00:00",
+   "summary": "Trouver un autre chemin pour aller travailler, c’est le casse-tête qui commence pour les habitués de l’A13, fermée depuis lundi 16 novembre matin à la sortie de Paris, en direction de la Normandie, jusqu’à fin août 2027. Les bouchons étaient déjà nombreux ce lundi, et les communes voisines veulent éviter de récupérer les voitures dans leurs rues. Certains maires ont même sollicité les applications GPS.",
+   "cve": [],
+   "id": "7f29ac7daca9"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Deux ans de prison, dont un ferme, requis contre Pierre Ménès, jugé pour agressions sexuelles et harcèlement moral",
+   "link": "https://www.franceinfo.fr/societe/harcelement-sexuel/deux-ans-de-prison-dont-un-ferme-requis-contre-pierre-menes-juge-pour-agressions-sexuelles-et-harcelement-moral_8285549.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T22:42:00+00:00",
+   "summary": "Dans son réquisitoire, la procureure de la République a insisté sur la \"gravité\" des faits pour lesquels l'ex-chroniqueur sportif de Canal+ comparaît.",
+   "cve": [],
+   "id": "bb399652175d"
+  },
+  {
+   "source": "Cisco · Avis de sécurité",
+   "type": "vuln",
+   "title": "Cisco Informational for Emergency Distrust of eMudhra Root and Intermediate Certificate Authorities",
+   "link": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-emudhra-info-ScS22A1r?vs_f=Cisco%20Security%20Advisory%26vs_cat=Security%20Intelligence%26vs_type=RSS%26vs_p=Cisco%20Informational%20for%20Emergency%20Distrust%20of%20eMudhra%20Root%20and%20Intermediate%20Certificate%20Authorities%26vs_k=1",
+   "date": "2026-11-16T22:25:32+00:00",
+   "summary": "Between October 17 and October 20, 2026, a critical security compromise involving Certificate Authorities that are managed by eMudhra was uncovered. A security researcher demonstrated that the private keys for eight eMudhra intermediate certificates were fundamentally broken due to an unprecedented error in their Key Generation Ceremony (KGC) in April 2025. This allows anyone to brute-force acquire these private keys within seconds. For more information, see eMudhra Intermediate CA Compromise a…",
+   "cve": [],
+   "id": "65538afb362b"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Débat de la présidentielle 2027 : revivez le débat entre Marine Le Pen, Raphaël Glucksmann, Jean-Luc Mélenchon, Gabriel Attal et Bruno Retailleau",
+   "link": "https://www.lemonde.fr/election-presidentielle-2027/live/2026/11/16/en-direct-debat-de-la-presidentielle-2027-les-cinq-candidats-s-affrontent-sur-les-retraites-marine-le-pen-cible-la-ligue-des-droits-de-l-homme-un-ramassis-de-gauchistes_6811633_6205049.html",
+   "date": "2026-11-16T22:21:54+00:00",
+   "summary": "Les cinq candidats à l’élection ont débattu pendant près de trois heures sur TF1 puis LCI. « Financement magique », « foire aux taxes », « cadeaux fiscaux aux plus riches »… Tous s’accusent, notamment, de ne pas financer leurs propositions.",
+   "cve": [],
+   "id": "f68728ab51d0"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Le XXᵉ Sommet de la francophonie paralysé par les tensions diplomatiques​",
+   "link": "https://www.lemonde.fr/international/article/2026/11/16/une-crise-inedite-au-sommet-de-la-francophonie-paralysee-par-les-tensions-diplomatiques_6812590_3210.html",
+   "date": "2026-11-16T22:21:42+00:00",
+   "summary": "Les 53 Etats membres de l’Organisation internationale de la francophonie ont reporté d’un an, lundi au Cambodge, la désignation de leur secrétaire général, faute de consensus. Une première, sur fond d’affrontement entre Kinshasa et Kigali autour d’un troisième mandat de la Rwandaise Louise Mushikiwabo.",
+   "cve": [],
+   "id": "7fc5dd022f05"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Qu'est-ce que le \"Rhum Express\", ce phénomène qui va arroser abondamment la Bretagne et balayer le territoire en plein novembre ?",
+   "link": "https://www.franceinfo.fr/environnement/meteo/qu-est-ce-que-le-rhum-express-ce-phenomene-qui-va-arroser-abondamment-la-bretagne-et-balayer-le-territoire-en-plein-novembre_8285528.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T21:52:00+00:00",
+   "summary": "Il va falloir garder le parapluie à portée de main cette semaine : jusqu’à 50 litres d’eau par mètre carré sont attendus localement en Bretagne d’ici mardi matin. Les pluies vont ensuite traverser une grande partie du pays. Cette humidité nous arrive des Antilles, portée par un phénomène surnommé le \"Rhum Express\". Comment fonctionne-t-il, et jusqu’à quand va-t-il nous concerner ?",
+   "cve": [],
+   "id": "3d05e190a606"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "L'Assemblée adopte un texte soutenu par le gouvernement pour faciliter le déblocage de l'épargne salariale",
+   "link": "https://www.franceinfo.fr/economie/pouvoir-achat/l-assemblee-adopte-un-texte-soutenu-par-le-gouvernement-pour-faciliter-le-deblocage-de-l-epargne-salariale_8285510.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T21:46:35+00:00",
+   "summary": "La proposition de loi doit désormais faire l'objet d'un compromis entre députés et sénateurs lors d'une prochaine commission mixte paritaire.",
+   "cve": [],
+   "id": "3113dd7895bf"
+  },
+  {
+   "source": "BleepingComputer",
+   "type": "actualite",
+   "title": "Google Project Zero cuts bug disclosures to 30 days amid AI threats",
+   "link": "https://www.bleepingcomputer.com/news/security/google-project-zero-cuts-bug-disclosure-deadline-to-30-days-amid-ai-threats/",
+   "date": "2026-11-16T21:31:44+00:00",
+   "summary": "Google Project Zero will replace its \"90+30\" disclosure policy with shorter, fixed deadlines in response to AI-accelerated vulnerability discovery and exploitation. [...]",
+   "cve": [],
+   "id": "6cd4bc50c4fa"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Statue de la Vierge vandalisée à Porto-Vecchio : des peines de prison ferme requises",
+   "link": "https://www.lemonde.fr/societe/article/2026/11/16/en-corse-une-peine-de-prison-ferme-requise-pour-la-degradation-de-la-statue-de-la-vierge-a-porto-vecchio_6812458_3224.html",
+   "date": "2026-11-16T21:12:50+00:00",
+   "summary": "Deux jeunes travailleurs saisonniers, l’un ayant simulé des actes sexuels sur le monument et l’autre ayant filmé et publié la vidéo sur les réseaux sociaux, comparaissaient ce lundi en visioconférence devant le tribunal d’Ajaccio.",
+   "cve": [],
+   "id": "d8555ecb749b"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Marine Le Pen réitère auprès de l'ambassadeur ukrainien que la France ne pourrait \"plus aider financièrement\" Kiev si elle est élue",
+   "link": "https://www.franceinfo.fr/monde/europe/manifestations-en-ukraine/marine-le-pen-reitere-aupres-de-l-ambassadeur-ukrainien-que-la-france-ne-pourrait-plus-aider-financierement-kiev-si-elle-est-elue_8285462.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T21:09:09+00:00",
+   "summary": "La candidate du RN à la présidentielle a cependant assuré qu'elle \"tiendrait les engagements pris jusqu'à présent par la France\".",
+   "cve": [],
+   "id": "31bb4a9fd038"
+  },
+  {
+   "source": "BleepingComputer",
+   "type": "actualite",
+   "title": "California sues OpenAI over AI agents escaping sandboxes, hacking firms",
+   "link": "https://www.bleepingcomputer.com/news/security/california-sues-openai-over-ai-agents-escaping-sandboxes-hacking-firms/",
+   "date": "2026-11-16T20:59:44+00:00",
+   "summary": "California Attorney General Rob Bonta sued OpenAI on Monday, alleging the company knowingly continued testing advanced artificial intelligence models despite repeated security failures that allowed autonomous AI agents to escape isolated environments and launch cyberattacks against real-world organizations. [...]",
+   "cve": [],
+   "id": "f7229d91014f"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Le projet de cinq pays de l’UE d’ouvrir un centre de retour au Rwanda traduit la bascule de la politique européenne en matière d’immigration",
+   "link": "https://www.lemonde.fr/international/article/2026/11/16/le-projet-de-cinq-pays-europeens-d-ouvrir-un-centre-de-retour-au-rwanda-traduit-la-bascule-de-la-politique-europeenne-en-matiere-d-immigration_6812426_3210.html",
+   "date": "2026-11-16T20:52:34+00:00",
+   "summary": "L’Allemagne, l’Autriche, le Danemark, la Grèce et les Pays-Bas ont annoncé, lundi 16 novembre, la création d’une plateforme au Rwanda, où pourront être renvoyés les demandeurs d’asile déboutés.",
+   "cve": [],
+   "id": "fd6bc50eac5a"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "\"La conversation n'a pas été facile\" : de premiers pourparlers se sont tenus entre l'Ukraine, l'Europe et les Etats-Unis, annonce Volodymyr Zelensky",
+   "link": "https://www.franceinfo.fr/monde/europe/manifestations-en-ukraine/la-conversation-n-a-pas-ete-facile-de-premiers-pourparlers-se-sont-tenus-entre-l-ukraine-l-europe-et-les-etats-unis-annonce-volodymyr-zelensky_8285417.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T20:23:42+00:00",
+   "summary": "Des négociateurs d'Allemagne, de France, d'Italie, de Pologne et du Royaume-Uni ont participé à ces discussions en ligne.",
+   "cve": [],
+   "id": "5b7d7d91f0c6"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Au procès des parents de l’« inconnue de l’A10 », un réquisitoire sobre, subtil et pédagogue",
+   "link": "https://www.lemonde.fr/societe/article/2026/11/16/au-proces-des-parents-de-l-inconnue-de-l-a10-un-requisitoire-sobre-subtil-et-pedagogue_6812394_3224.html",
+   "date": "2026-11-16T20:19:08+00:00",
+   "summary": "Les deux représentants de l’accusation ont requis vingt ans de réclusion criminelle contre Halima El Bakhti et quatorze ans contre Ahmed Touloub.",
+   "cve": [],
+   "id": "2276c1e1158b"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Mobilisation du 17 novembre : des trains et des ports seront perturbés en raison d’un appel à la grève",
+   "link": "https://www.lemonde.fr/economie/article/2026/11/16/mobilisation-du-17-novembre-des-trains-et-des-ports-seront-perturbes-en-raison-d-un-appel-a-la-greve_6812393_3234.html",
+   "date": "2026-11-16T20:08:58+00:00",
+   "summary": "Certaines lignes des réseaux TER en Auvergne-Rhône-Alpes, Bourgogne-Franche-Comté, Bretagne, Centre-Val de Loire, Hauts-de-France, Nouvelle-Aquitaine, Occitanie et Pays de la Loire seront concernées par les perturbations, mardi, selon la SNCF.",
+   "cve": [],
+   "id": "fd8d3516ce38"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Renault va supprimer plus d’un millier de postes en France pour être plus compétitif face à la concurrence chinoise",
+   "link": "https://www.lemonde.fr/economie/article/2026/11/16/renault-va-supprimer-plus-d-un-millier-de-postes-en-france-pour-etre-plus-competitif-face-a-la-concurrence-chinoise_6812360_3234.html",
+   "date": "2026-11-16T19:59:33+00:00",
+   "summary": "Le groupe automobile français a annoncé un plan de départs volontaires concernant 1 000 personnes ainsi que 2 000 créations de postes d’ici à deux à trois ans. Une dizaine de sites seront concernés par ce double mouvement, partout en France.",
+   "cve": [],
+   "id": "587b91be7190"
+  },
+  {
+   "source": "BleepingComputer",
+   "type": "actualite",
+   "title": "Barracuda links cloud breach to ARTEX AI-powered cyberattack",
+   "link": "https://www.bleepingcomputer.com/news/security/barracuda-links-cloud-breach-to-artex-ai-powered-cyberattack/",
+   "date": "2026-11-16T19:57:13+00:00",
+   "summary": "Hackers who breached the cloud environment of network and email security company Barracuda earlier this month used a stolen cloud access key and the ARTEX AI penetration testing framework. [...]",
+   "cve": [],
+   "id": "f66e964ba9d3"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Grève dans la fonction publique, perturbations dans les transports, manifestations… A quoi s'attendre pour la mobilisation du 17 novembre ?",
+   "link": "https://www.franceinfo.fr/societe/manifestations/greves-dans-la-fonction-publique-mouvement-lyceen-manifestations-a-quoi-s-attendre-pour-la-mobilisation-du-17-novembre_8284415.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T19:54:31+00:00",
+   "summary": "Les syndicats appellent les agents de la fonction publique, de l'Education nationale ou encore des transports à faire grève mardi. Des dizaines de manifestations sont annoncées, auxquelles doivent se joindre lycéens, étudiants et gilets jaunes.",
+   "cve": [],
+   "id": "9623fabc2b7a"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Mobilisation de la jeunesse : 20 % des établissements du supérieur et 25 lycées franciliens perturbés lundi",
+   "link": "https://www.lemonde.fr/societe/article/2026/11/16/mobilisation-de-la-jeunesse-20-des-etablissements-du-superieur-et-25-lycees-franciliens-perturbes-lundi_6812298_3224.html",
+   "date": "2026-11-16T19:06:05+00:00",
+   "summary": "A la veille d’une nouvelle journée de mobilisation nationale, le gouvernement durcit le ton face à la contestation, en interdisant notamment la vente de mortiers d’artifice et les rassemblements autour de certains établissements parisiens.",
+   "cve": [],
+   "id": "ab4ebe73f5e9"
+  },
+  {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Alerte sur l’« aggravation historique » de l’état de la plupart des récifs coralliens, herbiers et mangroves des territoires d’outre-mer",
+   "link": "https://www.lemonde.fr/planete/article/2026/11/16/alerte-sur-l-aggravation-historique-de-l-etat-de-la-plupart-des-recifs-coralliens-herbiers-et-mangroves-des-territoires-d-outre-mer_6812295_3244.html",
+   "date": "2026-11-16T19:00:10+00:00",
+   "summary": "L’Initiative française pour les récifs coralliens a publié, lundi 16 novembre, un bilan des écosystèmes marins français d’outre-mer.",
+   "cve": [],
+   "id": "f2f6aaeccad2"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "\"On a massacré son innocence\" : au procès de \"la petite martyre de l'A10\", vingt ans et quatorze ans de prison requis contre la mère et le père d'Inass Touloub",
+   "link": "https://www.franceinfo.fr/faits-divers/martyre-de-l-a10/petite-martyre-de-l-a10-vingt-ans-de-reclusion-ont-ete-requis-contre-la-mere-d-inass-touloub-et-quatorze-ans-contre-son-pere_8285060.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T18:02:31+00:00",
+   "summary": "Halima El Bakhti et Ahmed Touloub sont jugés depuis deux semaines devant la cour d'assises du Loir-et-Cher, respectivement pour \"actes de torture et de barbarie ayant entraîné la mort sans intention de la donner\" et \"complicité\" de ces mêmes faits.",
+   "cve": [],
+   "id": "9013b9a3f7c5"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Après sa condamnation dans l'affaire des \"Volets verts\", on fait le point sur les plaintes et accusations de violences sexistes et sexuelles qui visent Gérard Depardieu",
+   "link": "https://www.franceinfo.fr/culture/cinema/depardieu/apres-sa-condamnation-dans-l-affaire-des-volets-verts-on-fait-le-point-sur-les-plaintes-et-accusations-de-violences-sexistes-et-sexuelles-qui-visent-gerard-depardieu_8284541.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T17:55:37+00:00",
+   "summary": "L'acteur a renoncé lundi à son procès en appel et présenté des \"excuses\" aux deux plaignantes, rendant définitive sa peine pour agressions sexuelles de dix-huit mois de prison avec sursis.",
+   "cve": [],
+   "id": "78728117d49a"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "A Gaza, les récentes inondations relancent les appels internationaux pour qu'Israël laisse passer l'aide humanitaire \"sans entrave\"",
+   "link": "https://www.franceinfo.fr/monde/palestine/gaza/a-gaza-les-recentes-inondations-relancent-les-appels-internationaux-pour-qu-israel-laisser-passer-l-aide-humanitaire-sans-entrave_8284628.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T17:31:58+00:00",
+   "summary": "Plusieurs dizaines de milliers d'abris ont été touchés après des pluies diluviennes, du 7 au 9 novembre. Plusieurs pays ont demandé au gouvernement israélien de permettre \"un accès humanitaire immédiat\" dans le territoire palestinien.",
+   "cve": [],
+   "id": "2a5ec83090a1"
+  },
+  {
+   "source": "franceinfo",
+   "type": "news",
+   "title": "Procès de l'assassinat du frère d'Amine Kessaci : deux figures du narcobanditisme marseillais condamnées à la perpétuité",
+   "link": "https://www.franceinfo.fr/faits-divers/justice-proces/proces-de-l-assassinat-du-frere-d-amine-kessaci-deux-figures-du-narcobanditisme-marseillais-condamnees-a-la-perpetuite_8285081.html#xtor=RSS-3-[lestitres]",
+   "date": "2026-11-16T17:13:20+00:00",
+   "summary": "Brahim Chabane, demi-frère du militant engagé contre le narcotrafic Amine Kessaci, est l'une des victimes d'un triple homicide à Marseille en décembre 2020.",
+   "cve": [],
+   "id": "bf9587f03124"
+  },
+  {
+   "source": "BleepingComputer",
+   "type": "actualite",
+   "title": "Microsoft says months-old bug caused global Microsoft 365 outage",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-months-old-bug-caused-global-microsoft-365-outage/",
+   "date": "2026-11-16T16:43:24+00:00",
+   "summary": "Microsoft says a software bug introduced in July caused last week's worldwide Microsoft 365 outage, triggering a cascading failure that left more than 80% of its networking gateway servers unresponsive. [...]",
+   "cve": [],
+   "id": "18b00fe2b40c"
+  },
   {
    "source": "franceinfo",
    "type": "news",
@@ -91,16 +381,6 @@
    "id": "71afe3d82013"
   },
   {
-   "source": "franceinfo",
-   "type": "news",
-   "title": "Procès de l'assassinat du frère d'Amine Kessaci : deux figures du narcobanditisme marseillais condamnées à la perpétuité",
-   "link": "https://www.franceinfo.fr/faits-divers/justice-proces/proces-de-l-assassinat-du-frere-d-amine-kessaci-deux-figures-du-narcobanditisme-marseillais-condamnees-a-la-perpetuite_8285081.html#xtor=RSS-3-[lestitres]",
-   "date": "2026-11-16T16:27:32+00:00",
-   "summary": "Brahim Chabane, demi-frère du militant engagé contre le narcotrafic Amine Kessaci, est l'une des victimes d'un triple homicide à Marseille en décembre 2020.",
-   "cve": [],
-   "id": "bf9587f03124"
-  },
-  {
    "source": "Le Monde",
    "type": "news",
    "title": "Cinq pays de l’UE, dont l’Allemagne, dévoilent leur projet de centre pour migrants au Rwanda",
@@ -109,16 +389,6 @@
    "summary": "L’Allemagne, le Danemark, l’Autriche, les Pays-Bas et la Grèce ont dévoilé lundi leur projet d’ouvrir au Rwanda le tout premier centre pour des migrants expulsés d’Europe.",
    "cve": [],
    "id": "af4abb7a2910"
-  },
-  {
-   "source": "franceinfo",
-   "type": "news",
-   "title": "\"Petite martyre de l'A10\" : vingt ans de réclusion ont été requis contre la mère d'Inass Touloub et quatorze ans contre son père",
-   "link": "https://www.franceinfo.fr/faits-divers/martyre-de-l-a10/petite-martyre-de-l-a10-vingt-ans-de-reclusion-ont-ete-requis-contre-la-mere-d-inass-touloub-et-quatorze-ans-contre-son-pere_8285060.html#xtor=RSS-3-[lestitres]",
-   "date": "2026-11-16T16:19:08+00:00",
-   "summary": "Halima El Bakhti et Ahmed Touloub sont jugés depuis deux semaines devant la cour d'assises du Loir-et-Cher, pour actes de torture et de barbarie ayant entraîné la mort de leur fille Inass en 1987.",
-   "cve": [],
-   "id": "9013b9a3f7c5"
   },
   {
    "source": "franceinfo",
@@ -311,16 +581,6 @@
    "id": "a3ae23eaeef1"
   },
   {
-   "source": "franceinfo",
-   "type": "news",
-   "title": "Grèves dans la fonction publique, mouvement lycéen, manifestations… A quoi s'attendre pour la mobilisation du 17 novembre ?",
-   "link": "https://www.franceinfo.fr/societe/manifestations/greves-dans-la-fonction-publique-mouvement-lyceen-manifestations-a-quoi-s-attendre-pour-la-mobilisation-du-17-novembre_8284415.html#xtor=RSS-3-[lestitres]",
-   "date": "2026-11-16T13:40:49+00:00",
-   "summary": "Les syndicats appellent les agents de la fonction publique, de l'Education nationale ou encore des transports à faire grève mardi. Des dizaines de manifestations sont annoncées, auxquelles doivent se joindre lycéens, étudiants et gilets jaunes.",
-   "cve": [],
-   "id": "9623fabc2b7a"
-  },
-  {
    "source": "Le Monde",
    "type": "news",
    "title": "COP31 : comment l’IA participe à la désinformation sur le climat",
@@ -401,6 +661,16 @@
    "id": "191680e8eb9e"
   },
   {
+   "source": "Le Monde",
+   "type": "news",
+   "title": "Salomé Saqué, essayiste : « Il est temps de faire des douleurs des femmes un enjeu politique qui concerne aussi les hommes »",
+   "link": "https://www.lemonde.fr/idees/article/2026/11/16/salome-saque-essayiste-il-est-temps-de-faire-des-douleurs-des-femmes-un-enjeu-politique-qui-concerne-aussi-les-hommes_6811435_3232.html",
+   "date": "2026-11-16T05:30:03+00:00",
+   "summary": "La journaliste souffre depuis l’adolescence de plusieurs maladies féminines, dont l’endométriose. Elle évoque, dans un entretien au « Monde », les inégalités subies par les femmes en matière de recherche et de traitements médicaux, auxquelles elle consacre une enquête.",
+   "cve": [],
+   "id": "61ab3bb540ef"
+  },
+  {
    "source": "CERT Santé · Alertes et vulnérabilités",
    "type": "vuln",
    "title": "aiohttp - CVE-2026-128128",
@@ -427,7 +697,7 @@
   {
    "source": "CERT Santé · Alertes et vulnérabilités",
    "type": "vuln",
-   "title": "n8n - CVE-2026-126384",
+   "title": "n8n - CVE-2026-126384 | modifié le 16-11-2026",
    "link": "https://cyberveille.esante.gouv.fr/alertes/n8n-cve-2026-126384-2026-11-16",
    "date": "2026-11-16T02:45:14+00:00",
    "summary": "Il s’agit d’une vulnérabilité dans la version de GraphicsMagick embarquée dans l’ image Docker officielle de n8n . n8n est une plateforme d’automatisation de flux de travail...",
@@ -589,16 +859,6 @@
    "summary": "On October 21, 2026, Node.js announced the availability of fixes for multiple vulnerabilities across the following supported release lines: 22.x, 24.x, and 26.x. These vulnerabilities impact critical operations such as the Brotli decoder, DNS resolution, and TLS certificate validation. The vulnerabilities pose risks for remote code execution and traffic interception. For more information, see Node.js Security Release . The following vulnerabilities have a Security Impact Rating (SIR) of High an…",
    "cve": [],
    "id": "bc11b4ad3e74"
-  },
-  {
-   "source": "Cisco · Avis de sécurité",
-   "type": "vuln",
-   "title": "Cisco Informational for Emergency Distrust of eMudhra Root and Intermediate Certificate Authorities",
-   "link": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-emudhra-info-ScS22A1r?vs_f=Cisco%20Security%20Advisory%26vs_cat=Security%20Intelligence%26vs_type=RSS%26vs_p=Cisco%20Informational%20for%20Emergency%20Distrust%20of%20eMudhra%20Root%20and%20Intermediate%20Certificate%20Authorities%26vs_k=1",
-   "date": "2026-11-13T20:01:18+00:00",
-   "summary": "Between October 17 and October 20, 2026, a critical security compromise involving Certificate Authorities that are managed by eMudhra was uncovered. A security researcher demonstrated that the private keys for eight eMudhra intermediate certificates were fundamentally broken due to an unprecedented error in their Key Generation Ceremony (KGC) in April 2025. This allows anyone to brute-force acquire these private keys within seconds. For more information, see eMudhra Intermediate CA Compromise a…",
-   "cve": [],
-   "id": "65538afb362b"
   },
   {
    "source": "BleepingComputer",
@@ -1352,7 +1612,7 @@
    "title": "Improper limitation of a pathname to a restricted directory",
    "link": "https://fortiguard.fortinet.com/psirt/FG-IR-26-237",
    "date": "2026-11-10T08:00:00+00:00",
-   "summary": "CVSSv3 Score: 7.2 An Improper Limitation of a Pathname to a Restricted Directory (CWE-22) vulnerability in FortiManager, FortiAnalyzer, FortiManager Cloud and FortiAnalyzer Cloud may allow an authenticated attacker with admin privileges to execute unauthorized code or commands via crafted requests. Revised on 2026-11-10 00:00:00",
+   "summary": "CVSSv3 Score: 7.2 An Improper Limitation of a Pathname to a Restricted Directory vulnerability [CWE-22] in FortiManager, FortiAnalyzer, FortiManager Cloud and FortiAnalyzer Cloud may allow an authenticated attacker with admin privileges to execute unauthorized code or commands via crafted requests. Revised on 2026-11-10 00:00:00",
    "cve": [],
    "id": "f49d6199c051"
   },
@@ -1402,7 +1662,7 @@
    "title": "Improper neutralization of argument delimiters in a command",
    "link": "https://fortiguard.fortinet.com/psirt/FG-IR-26-239",
    "date": "2026-11-10T08:00:00+00:00",
-   "summary": "CVSSv3 Score: 7.2 An Improper Neutralization of Argument Delimiters in a Command ('Argument Injection')[CWE-88] vulnerability in FortiManager,FortiAnalyzer, FortiManager Cloud, FortiAnalyzer Cloud may allow an authenticated privileged admin user to execute unauthorized code or commands. Revised on 2026-11-10 00:00:00",
+   "summary": "CVSSv3 Score: 7.2 An Improper Neutralization of Argument Delimiters in a Command ('Argument Injection') vulnerability[CWE-88] in FortiManager,FortiAnalyzer, FortiManager Cloud, FortiAnalyzer Cloud may allow an authenticated privileged admin user to execute unauthorized code or commands. Revised on 2026-11-10 00:00:00",
    "cve": [],
    "id": "96b6ed63f191"
   },
@@ -1425,6 +1685,16 @@
    "summary": "CVSSv3 Score: 7.6 An Improper Neutralization of Argument Delimiters in a Command ('Argument Injection') [CWE-88] in FortiMail may allow an authenticated remote attacker with domain admin or admin privileges to delete users of other tenant domains on a paired FortiAuthenticator, execute arbitrary code as root or arbitrary CLI commands, and read or write arbitrary files as root via crafted HTTP requests to the administrative interface. Revised on 2026-11-10 00:00:00",
    "cve": [],
    "id": "ef9fee20f117"
+  },
+  {
+   "source": "Fortinet · PSIRT",
+   "type": "vuln",
+   "title": "Unauthenticated adjacent command execution via HA",
+   "link": "https://fortiguard.fortinet.com/psirt/FG-IR-26-273",
+   "date": "2026-11-10T08:00:00+00:00",
+   "summary": "CVSSv3 Score: 9.0 A missing authentication for critical function vulnerability [CWE-306] in FortiOS may allow an unauthenticated attacker with HA FGSP + standalone-config-sync, or autoscale to execute command as super admin via crafted HA packets. Revised on 2026-11-16 00:00:00",
+   "cve": [],
+   "id": "1950601a212e"
   },
   {
    "source": "CERT Santé · Alertes et vulnérabilités",
@@ -3672,45 +3942,6 @@
     "CVE-2026-7273"
    ],
    "id": "ba5d07ef6dfc"
-  },
-  {
-   "source": "CISA · Failles exploitées (KEV)",
-   "type": "kev",
-   "title": "CVE-2025-39964 — Linux Kernel : Linux Kernel Race Condition Vulnerability",
-   "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-39964",
-   "date": "2026-09-18T00:00:00+00:00",
-   "summary": "Linux Kernel contains a race condition vulnerability which allows concurrent writes to the same AF_ALG socket causing data to be unpredictably interleaved and creating inconsistencies in the socket's internal state. Action requise : Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 gui…",
-   "ransomware": false,
-   "cve": [
-    "CVE-2025-39964"
-   ],
-   "id": "02aaeed7c487"
-  },
-  {
-   "source": "CISA · Failles exploitées (KEV)",
-   "type": "kev",
-   "title": "CVE-2026-53266 — Linux Kernel : Linux Kernel Out-of-Bounds Write Vulnerability",
-   "link": "https://nvd.nist.gov/vuln/detail/CVE-2026-53266",
-   "date": "2026-09-18T00:00:00+00:00",
-   "summary": "Linux Kernel contains an out-of-bounds write vulnerability in the ebtables SNAT target which allows an ARP sender hardware address rewrite to write directly into a nonlinear socket-buffer fragment backed by a splice-imported file page. The impacted product(s) could be end-of-life (EoL) and/or end-of-service (EoS). Users are advised to discontinue use and/or transition to a supported version. Action requise : Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA…",
-   "ransomware": false,
-   "cve": [
-    "CVE-2026-53266"
-   ],
-   "id": "976a305feac5"
-  },
-  {
-   "source": "CISA · Failles exploitées (KEV)",
-   "type": "kev",
-   "title": "CVE-2025-39682 — Linux Kernel : Linux Kernel Improper Check for Unusual or Exceptional Conditions Vulnerability",
-   "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-39682",
-   "date": "2026-09-18T00:00:00+00:00",
-   "summary": "Linux Kernel contains an improper check for unusual or exceptional conditions vulnerability in the TLS receive path which allows a zero-length record retrieved from the rx_list to bypass the intended recvmsg() record-type handling, potentially causing subsequent TLS records to be processed using incorrect zero-copy and queuing assumptions. The impacted product(s) could be end-of-life (EoL) and/or end-of-service (EoS). Users are advised to discontinue use and/or transition to a supported version…",
-   "ransomware": false,
-   "cve": [
-    "CVE-2025-39682"
-   ],
-   "id": "bb7258b3f1d3"
   }
  ]
 }
