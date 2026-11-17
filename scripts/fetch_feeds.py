@@ -123,6 +123,7 @@ def parse_feed(raw, feed):
         out.append({
             "source": feed["name"],
             "type": resolve_type(feed["type"], link),
+            "lang": feed.get("lang", "fr"),
             "title": title,
             "link": link,
             "date": parse_date(child_text(node, "pubDate", "published", "updated", "date")),
@@ -162,13 +163,20 @@ def collect_kev(cfg, status):
             if not date or date < limit:
                 continue
             cve = v.get("cveID", "")
+            vendor = f'{v.get("vendorProject", "")} {v.get("product", "")}'.strip()
+            head = f"{cve} — {vendor} : "
+            tail = v.get("vulnerabilityName", "")
             items.append({
                 "source": name,
                 "type": "kev",
-                "title": f'{cve} — {v.get("vendorProject", "")} {v.get("product", "")} : {v.get("vulnerabilityName", "")}'.strip(),
+                "lang": "en",
+                "title": f"{head}{tail}".strip(),
+                "title_head": head,   # gardé tel quel à la traduction (CVE, éditeur, produit)
+                "title_tail": tail,   # seule partie traduite
                 "link": f"https://nvd.nist.gov/vuln/detail/{cve}" if cve else "",
                 "date": date,
-                "summary": clean(f'{v.get("shortDescription", "")} Action requise : {v.get("requiredAction", "")}'),
+                "summary": clean(v.get("shortDescription", "")),
+                "action": clean(v.get("requiredAction", ""), 300),
                 "ransomware": v.get("knownRansomwareCampaignUse") == "Known",
             })
         items.sort(key=lambda i: i["date"], reverse=True)
@@ -236,6 +244,11 @@ def main():
     # Fusion avec la collecte précédente : un flux en panne ne vide pas l'écran.
     merged = {i["id"]: i for i in previous.get("items", []) if "id" in i}
     for it in fresh:
+        old = merged.get(it["id"])
+        if old:  # on garde les traductions déjà faites si le texte d'origine n'a pas changé
+            for src, dst in (("title", "title_fr"), ("summary", "summary_fr"), ("action", "action_fr")):
+                if old.get(dst) and old.get(src) == it.get(src):
+                    it[dst] = old[dst]
         merged[it["id"]] = it
 
     keep_sec = now - timedelta(days=cfg.get("retention_days", 60))

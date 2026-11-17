@@ -7,7 +7,7 @@ fonctionne même si la connexion coupe un moment).
   (Patch Tuesday, jours fériés), état des services, actualités.
 - **Veille** : alertes, avis et failles, avec filtres, recherche et repérage « Périmètre ».
 - **Infos** : météo détaillée (24 h + 6 jours), calendrier, état des services, actualités.
-- **Réglages** : thème Nuit ou Jour, titre affiché, liste des logiciels suivis, état de chaque source.
+- **Réglages** : thème Clair (par défaut) ou Soir, titre affiché, liste des logiciels suivis, état de chaque source.
 
 Comment ça marche : GitHub exécute `scripts/fetch_feeds.py` toutes les 30 minutes (gratuit), qui
 enregistre `data.json`. La tablette affiche le site hébergé par GitHub Pages. Elle n'a besoin que
@@ -32,6 +32,16 @@ d'Internet, jamais du réseau interne.
 4. Aller dans **Réglages** et adapter la liste des logiciels suivis au parc du service.
 
 La tablette doit pouvoir joindre `*.github.io` et `api.open-meteo.com` (Wi-Fi invité ou carte SIM).
+
+## Traduction en français
+
+Les articles en anglais (CISA, Cisco, Fortinet, BleepingComputer) sont traduits automatiquement par
+GitHub Actions avec Argos Translate (logiciel libre, hors-ligne, sans clé ni compte). Titre et résumé
+s'affichent en français ; le titre original reste visible dans le détail de l'article.
+- La traduction est automatique : elle peut être imparfaite, l'appli le précise à l'écran.
+- La toute première exécution est longue (installation du traducteur, 10 à 20 minutes). Ensuite, seuls
+  les nouveaux articles sont traduits, et les traductions déjà faites sont conservées.
+- Une source en anglais se déclare avec `"lang": "en"` dans `config.json`.
 
 ## Si l'écran est vide
 

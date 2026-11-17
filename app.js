@@ -9,7 +9,7 @@
   const IDLE_RETURN_MS = 3 * 60 * 1000;
   const RELOAD_HOME_MS = 6 * 3600 * 1000; // récupère les nouvelles versions de l'appli
   const STALE_HOURS = 3;
-  const APP_VERSION = '2.1';
+  const APP_VERSION = '2.2';
   const PLACE = { name: 'Alençon', lat: 48.4329, lon: 0.0918 };
 
   const TYPES = {
@@ -75,9 +75,9 @@
     try {
       const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
       const watch = s.watch && typeof s.watch === 'object' && Object.keys(s.watch).length ? s.watch : DEFAULT_WATCH;
-      return { title: (s.title || '').trim() || DEFAULT_TITLE, watch, theme: s.theme === 'light' ? 'light' : 'dark' };
+      return { title: (s.title || '').trim() || DEFAULT_TITLE, watch, theme: s.theme === 'dark' ? 'dark' : 'light' };
     } catch (e) {
-      return { title: DEFAULT_TITLE, watch: DEFAULT_WATCH, theme: 'dark' };
+      return { title: DEFAULT_TITLE, watch: DEFAULT_WATCH, theme: 'light' };
     }
   }
 
@@ -122,7 +122,7 @@
   const WATCH = compileWatch(SETTINGS.watch);
 
   function findMatches(it) {
-    const text = `${it.title} ${it.summary}`;
+    const text = `${it.title} ${it.summary} ${it.title_fr || ''} ${it.summary_fr || ''}`;
     const seen = new Set();
     const out = [];
     WATCH.forEach((w) => {
@@ -202,15 +202,20 @@
   /* ---------- briques communes ---------- */
 
   const within = (it, days) => Date.now() - it._d < days * DAY;
+  const tTitle = (it) => it.title_fr || it.title;
+  const tSummary = (it) => it.summary_fr || it.summary;
+  const tAction = (it) => it.action_fr || it.action;
+  const isHttp = (u) => typeof u === 'string' && /^https?:\/\//i.test(u);
   const badge = (text, cls) => el('span', 'badge ' + cls, text);
 
   function itemNode(it) {
     const li = el('li', 'item t-' + it.type);
     li.tabIndex = 0;
-    li.append(el('div', 'title', it.title));
+    li.append(el('div', 'title', tTitle(it)));
     const meta = el('div', 'meta');
     meta.append(badge(it.type === 'news' ? it.source : (TYPES[it.type] || it.type), 'b-' + it.type));
     if (it.ransomware) meta.append(badge('Rançongiciel connu', 'b-ransom'));
+    if (it.lang === 'en' && !it.title_fr) meta.append(badge('En anglais', 'b-actualite'));
     if (it.matches && it.matches.length) {
       const names = [...new Set(it.matches.map((m) => m.keyword))].slice(0, 3).join(', ');
       meta.append(badge('Périmètre : ' + names, 'b-match'));
@@ -260,25 +265,44 @@
   function openModal(it) {
     const body = $('#modal-body');
     body.replaceChildren();
-    body.append(el('h3', '', it.title));
+    body.append(el('h3', '', tTitle(it)));
     const row = el('div', 'row');
     row.append(badge(it.type === 'news' ? it.source : (TYPES[it.type] || it.type), 'b-' + it.type));
     if (it.ransomware) row.append(badge('Utilisée par des rançongiciels', 'b-ransom'));
     row.append(el('span', '', fmtDateTime(it._d)));
     if (it.type !== 'news') row.append(el('span', '', '· ' + it.source));
     body.append(row);
+    if (it.title_fr && it.title_fr !== it.title) body.append(el('div', 'orig', 'Titre original : ' + it.title));
     if (it.matches && it.matches.length) {
       const m = el('div', 'row');
       it.matches.forEach((x) => m.append(badge(`${x.keyword} · ${x.group}`, 'b-match')));
       body.append(m);
     }
-    body.append(el('p', '', it.summary || 'Pas de résumé fourni par la source.'));
+    body.append(el('h4', '', 'Résumé'));
+    body.append(el('p', '', tSummary(it) || 'Pas de résumé fourni par la source.'));
+    if (it.action) {
+      body.append(el('h4', '', 'Action recommandée'));
+      body.append(el('p', '', tAction(it)));
+    }
     if (it.cve && it.cve.length) {
       const c = el('div', 'cves');
       it.cve.slice(0, 12).forEach((id) => c.append(el('span', '', id)));
       body.append(c);
     }
-    if (it.link) body.append(el('div', 'src', 'Source : ' + it.link));
+    if (it.title_fr || it.summary_fr) {
+      body.append(el('div', 'note', "Traduit automatiquement de l'anglais : la traduction peut être imparfaite."));
+    } else if (it.lang === 'en') {
+      body.append(el('div', 'note', 'Texte en anglais : la traduction arrive à la prochaine mise à jour.'));
+    }
+    if (isHttp(it.link)) {
+      const actions = el('div', 'modal-actions');
+      const a = el('a', 'btn primary linkbtn', 'Lien');
+      a.href = it.link;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      actions.append(a);
+      body.append(actions);
+    }
     $('#modal').hidden = false;
   }
 
@@ -469,6 +493,14 @@
 
   /* ---------- état des services ---------- */
 
+  const SERVICE_TEXT = {
+    none: 'Tous les systèmes sont opérationnels',
+    minor: 'Perturbation mineure',
+    major: 'Panne majeure',
+    critical: 'Panne critique',
+    maintenance: 'Maintenance en cours',
+  };
+
   function renderServices() {
     const ul = $('#services');
     if (!ul) return;
@@ -476,10 +508,10 @@
     const list = (DATA && DATA.services) || [];
     if (!list.length) { ul.append(el('li', 'empty', 'Aucune donnée.')); return; }
     list.forEach((s) => {
-      const cls = s.indicator === 'none' ? 'ok' : s.indicator === 'minor' ? 'warn' : (s.indicator === 'major' || s.indicator === 'critical') ? 'bad' : '';
+      const cls = s.indicator === 'none' ? 'ok' : (s.indicator === 'minor' || s.indicator === 'maintenance') ? 'warn' : (s.indicator === 'major' || s.indicator === 'critical') ? 'bad' : '';
       const li = el('li');
       const grow = el('div', 'grow');
-      grow.append(el('div', '', s.name), el('div', 'sub', s.description || '—'));
+      grow.append(el('div', '', s.name), el('div', 'sub', SERVICE_TEXT[s.indicator] || 'Statut inconnu'));
       li.append(el('span', 'dot ' + cls), grow);
       ul.append(li);
     });
@@ -496,7 +528,7 @@
       NEWS.slice(0, 6).forEach((it) => {
         const li = el('li', 'news');
         li.tabIndex = 0;
-        li.append(el('div', 'src', it.source), el('div', 't', it.title), el('div', 'ago', ago(it._d)));
+        li.append(el('div', 'src', it.source), el('div', 't', tTitle(it)), el('div', 'ago', ago(it._d)));
         li.addEventListener('click', () => openModal(it));
         strip.append(li);
       });
@@ -613,7 +645,7 @@
       if (state.period !== 'all' && !within(i, Number(state.period))) return false;
       if (state.match && !i.matches.length) return false;
       if (state.group !== 'all' && !i.matches.some((m) => m.group === state.group)) return false;
-      if (q && !`${i.title} ${i.summary} ${(i.cve || []).join(' ')}`.toLowerCase().includes(q)) return false;
+      if (q && !`${i.title} ${i.summary} ${i.title_fr || ''} ${i.summary_fr || ''} ${(i.cve || []).join(' ')}`.toLowerCase().includes(q)) return false;
       return true;
     }).sort((a, b) => b._d - a._d);
   }
@@ -661,7 +693,7 @@
     const drawTheme = () => {
       const box = $('#set-theme');
       box.replaceChildren();
-      [['dark', 'Nuit'], ['light', 'Jour']].forEach(([v, label]) => {
+      [['light', 'Clair'], ['dark', 'Soir']].forEach(([v, label]) => {
         box.append(chip(label, theme === v, () => {
           theme = v;
           document.documentElement.dataset.theme = v;

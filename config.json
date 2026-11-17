@@ -39,21 +39,24 @@
       "url": "https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml",
       "type": "vuln",
       "max": 30,
-      "enabled": true
+      "enabled": true,
+      "lang": "en"
     },
     {
       "name": "Fortinet · PSIRT",
       "url": "https://filestore.fortinet.com/fortiguard/rss/ir.xml",
       "type": "vuln",
       "max": 30,
-      "enabled": true
+      "enabled": true,
+      "lang": "en"
     },
     {
       "name": "BleepingComputer",
       "url": "https://www.bleepingcomputer.com/feed/",
       "type": "actualite",
       "max": 15,
-      "enabled": true
+      "enabled": true,
+      "lang": "en"
     },
     {
       "name": "franceinfo",
